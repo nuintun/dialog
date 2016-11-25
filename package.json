@@ -1,0 +1,19 @@
+{
+  "name": "dialog",
+  "version": "0.0.1",
+  "description": "W3C HTML5 Dialog API.",
+  "author": {
+    "name": "nuintun",
+    "email": "nuintun@qq.com"
+  },
+  "homepage": "https://nuintun.github.io/dialog",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nuintun/dialog.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^0.36.3",
+    "uglify-js": "^2.7.4"
+  }
+}
