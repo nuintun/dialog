@@ -1,3 +1,22 @@
+@-webkit-keyframes dialogZoomIn {
+  from {
+    opacity: 0;
+    -webkit-transform: scale3d(.3, .3, .3);
+    transform: scale3d(.3, .3, .3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes dialogZoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(.3, .3, .3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
 .ui-modal-dialog-mask {
   background: #ccc;
   opacity: .65;
@@ -6,4 +25,13 @@
 }
 :root .ui-modal-dialog-mask {
   filter: none \9;
+}
+.ui-dialog-show {
+  /* http://ued.taobao.com/blog/2011/04/onfocus-this-blur/ */
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-duration: .16s;
+  animation-duration: .16s;
+  -webkit-animation-name: dialogZoomIn;
+  animation-name: dialogZoomIn;
 }
