@@ -135,7 +135,13 @@
     // 遮罩分配
     alloc: [],
     // 遮罩节点
-    node: $('<div class="ui-dialog-mask" tableindex="0"></div>'),
+    node: $('<div tableindex="0"></div>').css({
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      position: 'fixed'
+    }),
     /**
      * 显示遮罩
      * @param {HTMLElement} anchor 定位节点
@@ -171,8 +177,17 @@
   function Dialog() {
     var context = this;
 
+    context.destroyed = false;
     context.node = document.createElement('div');
-    context.__dialog = $(context.node);
+    context.__dialog = $(context.node)
+      .css({
+        outline: 0,
+        display: 'none',
+        position: 'absolute'
+      })
+      .attr('tabindex', '-1')
+      .html(context.innerHTML)
+      .appendTo(document.body);
   }
 
   // 当前叠加高度
@@ -240,12 +255,13 @@
         return context;
       }
 
-      var mask = Mask.node;
       var dialog = context.__dialog;
 
       context.open = true;
       context.follow = anchor || context.follow;
       context.__activeElement = context.__getActive();
+
+      console.log(context.innerHTML);
 
       // 初始化 show 方法
       if (!context.__ready) {
@@ -258,11 +274,13 @@
         if (context.modal) {
           context.__ready = true;
 
+          Mask.node.addClass(context.className + '-mask');
           dialog.addClass(context.className + '-modal');
-          mask.show(context.node);
+          Mask.show(context.node);
         }
 
-        if (!dialog.html()) {
+        if (dialog.html() !== context.innerHTML) {
+
           dialog.html(context.innerHTML);
         }
       }
@@ -303,6 +321,7 @@
           .hide()
           .removeClass(this.className + '-show');
         Mask.hide(context.node);
+        Mask.node.removeClass(context.className + '-mask');
 
         context.open = false;
         context.modal = false;
@@ -332,6 +351,7 @@
 
       if (context.modal && context.open) {
         Mask.hide(context.node);
+        Mask.node.removeClass(context.className + '-mask');
       }
 
       // 从 DOM 中移除节点

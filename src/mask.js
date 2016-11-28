@@ -6,7 +6,13 @@ export var Mask = {
   // 遮罩分配
   alloc: [],
   // 遮罩节点
-  node: $('<div class="ui-dialog-mask" tableindex="0"></div>'),
+  node: $('<div tableindex="0"></div>').css({
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    position: 'fixed'
+  }),
   /**
    * 显示遮罩
    * @param {HTMLElement} anchor 定位节点
