@@ -535,8 +535,8 @@
       var context = this;
       var dialog = context.__dialog;
 
-      if (context.__followSkin) {
-        dialog.removeClass(context.__followSkin);
+      if (context.__align) {
+        dialog.removeClass(context.__align);
       }
 
       anchor = anchor.parentNode && $(anchor);
@@ -629,7 +629,7 @@
       //添加follow的css, 为了给css使用
       className += align.join('-') + ' ' + this.className + '-follow';
 
-      context.__followSkin = className;
+      context.__align = className;
 
       if (anchor.length) {
         dialog.addClass(className);
