@@ -286,8 +286,12 @@
           .hide()
           .removeClass(this.className + '-show');
         Mask.node.hide();
+
         context.open = false;
-        context.blur(); // 恢复焦点，照顾键盘操作的用户
+        context.modal = false;
+
+        // 恢复焦点，照顾键盘操作的用户
+        context.blur();
         context.__dispatchEvent('close');
       }
 
