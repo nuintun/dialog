@@ -106,7 +106,7 @@ Dialog.prototype = {
       // 设置样式
       dialog
         .addClass(context.className)
-        .attr('role', context.modal ? 'modal-dialog' : 'dialog')
+        .attr('role', context.modal ? 'alertdialog' : 'dialog')
         .css('position', context.fixed ? 'fixed' : 'absolute');
 
       // 弹窗添加到文档树
