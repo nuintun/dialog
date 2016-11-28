@@ -10,20 +10,6 @@
   var APFilter = AP.filter;
   var APIndexOf = AP.indexOf;
   var APForEach = AP.forEach;
-  /**
-   * type
-   * @param {any} value
-   * @returns
-   */
-
-
-  /**
-   * typeIs
-   * @param {any} value
-   * @param {any} dataType
-   * @returns
-   */
-
 
   /**
    * apply
@@ -261,8 +247,6 @@
       context.follow = anchor || context.follow;
       context.__activeElement = context.__getActive();
 
-      console.log(context.innerHTML);
-
       // 初始化 show 方法
       if (!context.__ready) {
         dialog
@@ -280,7 +264,6 @@
         }
 
         if (dialog.html() !== context.innerHTML) {
-
           dialog.html(context.innerHTML);
         }
       }
@@ -320,6 +303,7 @@
         context.__dialog
           .hide()
           .removeClass(this.className + '-show');
+
         Mask.hide(context.node);
         Mask.node.removeClass(context.className + '-mask');
 
@@ -345,7 +329,7 @@
 
       context.__dispatchEvent('beforeremove');
 
-      if (Dialog.current === this) {
+      if (Dialog.current === context) {
         Dialog.current = null;
       }
 
@@ -387,8 +371,8 @@
     focus: function() {
       var context = this;
       var node = context.node;
-      var dialog = context.__dialog;
       var current = Dialog.current;
+      var dialog = context.__dialog;
       var index = context.zIndex = Dialog.zIndex++;
 
       if (current && current !== this) {
@@ -411,9 +395,9 @@
       // 设置叠加高度
       dialog.css('zIndex', index);
 
-      Dialog.current = this;
+      Dialog.current = context;
 
-      dialog.addClass(this.className + '-focus');
+      dialog.addClass(context.className + '-focus');
 
       context.__dispatchEvent('focus');
 
@@ -424,8 +408,8 @@
      */
     blur: function() {
       var context = this;
-      var activeElement = context.__activeElement;
       var isBlur = arguments[0];
+      var activeElement = context.__activeElement;
 
       if (isBlur !== false) {
         context.__focus(activeElement);
@@ -442,11 +426,11 @@
      * @param   {String}    事件类型
      * @param   {Function}  监听函数
      */
-    addEventListener: function(type$$1, callback) {
+    addEventListener: function(type, callback) {
       var context = this;
 
-      context.
-      __getEventListener(type$$1)
+      context
+        .__getEventListener(type)
         .push(callback);
 
       return context;
@@ -456,9 +440,9 @@
      * @param   {String}    事件类型
      * @param   {Function}  监听函数
      */
-    removeEventListener: function(type$$1, callback) {
+    removeEventListener: function(type, callback) {
       var context = this;
-      var listeners = context.__getEventListener(type$$1);
+      var listeners = context.__getEventListener(type);
 
       for (var i = 0; i < listeners.length; i++) {
         if (callback === listeners[i]) {
@@ -471,7 +455,7 @@
     /**
      * 获取事件缓存
      */
-    __getEventListener: function(type$$1) {
+    __getEventListener: function(type) {
       var context = this;
       var listener = context.__listener;
 
@@ -479,19 +463,19 @@
         listener = context.__listener = {};
       }
 
-      if (!listener[type$$1]) {
-        listener[type$$1] = [];
+      if (!listener[type]) {
+        listener[type] = [];
       }
 
-      return listener[type$$1];
+      return listener[type];
     },
     // 派发事件
-    __dispatchEvent: function(type$$1) {
+    __dispatchEvent: function(type) {
       var context = this;
-      var listeners = context.__getEventListener(type$$1);
+      var listeners = context.__getEventListener(type);
 
-      if (context['on' + type$$1]) {
-        context['on' + type$$1].call(context);
+      if (context['on' + type]) {
+        context['on' + type].call(context);
       }
 
       for (var i = 0; i < listeners.length; i++) {

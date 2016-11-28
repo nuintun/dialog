@@ -92,8 +92,6 @@ Dialog.prototype = {
     context.follow = anchor || context.follow;
     context.__activeElement = context.__getActive();
 
-    console.log(context.innerHTML);
-
     // 初始化 show 方法
     if (!context.__ready) {
       dialog
@@ -111,7 +109,6 @@ Dialog.prototype = {
       }
 
       if (dialog.html() !== context.innerHTML) {
-
         dialog.html(context.innerHTML);
       }
     }
@@ -151,6 +148,7 @@ Dialog.prototype = {
       context.__dialog
         .hide()
         .removeClass(this.className + '-show');
+
       Mask.hide(context.node);
       Mask.node.removeClass(context.className + '-mask');
 
@@ -176,7 +174,7 @@ Dialog.prototype = {
 
     context.__dispatchEvent('beforeremove');
 
-    if (Dialog.current === this) {
+    if (Dialog.current === context) {
       Dialog.current = null;
     }
 
@@ -218,8 +216,8 @@ Dialog.prototype = {
   focus: function() {
     var context = this;
     var node = context.node;
-    var dialog = context.__dialog;
     var current = Dialog.current;
+    var dialog = context.__dialog;
     var index = context.zIndex = Dialog.zIndex++;
 
     if (current && current !== this) {
@@ -242,9 +240,9 @@ Dialog.prototype = {
     // 设置叠加高度
     dialog.css('zIndex', index);
 
-    Dialog.current = this;
+    Dialog.current = context;
 
-    dialog.addClass(this.className + '-focus');
+    dialog.addClass(context.className + '-focus');
 
     context.__dispatchEvent('focus');
 
@@ -255,8 +253,8 @@ Dialog.prototype = {
    */
   blur: function() {
     var context = this;
-    var activeElement = context.__activeElement;
     var isBlur = arguments[0];
+    var activeElement = context.__activeElement;
 
     if (isBlur !== false) {
       context.__focus(activeElement);
@@ -276,8 +274,8 @@ Dialog.prototype = {
   addEventListener: function(type, callback) {
     var context = this;
 
-    context.
-    __getEventListener(type)
+    context
+      .__getEventListener(type)
       .push(callback);
 
     return context;

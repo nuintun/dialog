@@ -1,28 +1,7 @@
 var AP = Array.prototype;
-var OP = Object.prototype;
 var APFilter = AP.filter;
 var APIndexOf = AP.indexOf;
 var APForEach = AP.forEach;
-var OPToString = OP.toString;
-
-/**
- * type
- * @param {any} value
- * @returns
- */
-export function type(value) {
-  return OPToString.call(value);
-}
-
-/**
- * typeIs
- * @param {any} value
- * @param {any} dataType
- * @returns
- */
-export function typeIs(value, dataType) {
-  return type(value) === '[object ' + dataType + ']';
-}
 
 /**
  * apply
