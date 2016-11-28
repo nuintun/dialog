@@ -370,11 +370,14 @@ Dialog.prototype = {
       returned = context['on' + type].call(context);
     }
 
+    var result;
+
+    // 执行事件队列
     for (var i = 0, length = listeners.length; i < length; i++) {
-      if (returned === false) {
-        listeners[i].call(context);
-      } else {
-        returned = listeners[i].call(context);
+      result = listeners[i].call(context);
+
+      if (returned !== false) {
+        returned = result;
       }
     }
 
