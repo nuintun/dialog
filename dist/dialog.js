@@ -121,7 +121,7 @@
     // 遮罩分配
     alloc: [],
     // 遮罩节点
-    node: $('<div tableindex="0"></div>').css({
+    node: $('<div class="ui-modal-dialog-mask" tableindex="0"></div>').css({
       position: 'fixed',
       top: 0,
       left: 0,
@@ -171,9 +171,7 @@
         position: 'absolute',
         outline: 0
       })
-      .attr('tabindex', '-1')
-      .html(context.innerHTML)
-      .appendTo(document.body);
+      .attr('tabindex', '-1');
   }
 
   // 当前叠加高度
@@ -237,8 +235,14 @@
     show: function(anchor) {
       var context = this;
 
+      // 已销毁
       if (context.destroyed) {
         return context;
+      }
+
+      // 已打开先关闭
+      if (context.open) {
+        context.__close();
       }
 
       var dialog = context.__dialog;
@@ -249,30 +253,47 @@
 
       // 初始化 show 方法
       if (!context.__ready) {
+        context.__ready = true;
+
+        // 设置样式
         dialog
           .addClass(context.className)
           .attr('role', context.modal ? 'modal-dialog' : 'dialog')
           .css('position', context.fixed ? 'fixed' : 'absolute');
 
+        // 弹窗添加到文档树
+        dialog.appendTo(document.body);
+
         // 模态浮层的遮罩
         if (context.modal) {
-          context.__ready = true;
-
-          Mask.node.addClass(context.className + '-mask');
           dialog.addClass(context.className + '-modal');
-          Mask.show(context.node);
-        }
-
-        if (dialog.html() !== context.innerHTML) {
-          dialog.html(context.innerHTML);
         }
       }
 
+      // 设置内容
+      if (context.__innerHTML !== context.innerHTML) {
+        dialog.html(context.innerHTML);
+
+        // 换成内容
+        context.__innerHTML = context.innerHTML;
+      }
+
+      // 显示遮罩
+      if (context.modal) {
+        Mask.show(context.node);
+      }
+
+      // 设置样式
       dialog
         .addClass(context.className + '-show')
         .show();
 
-      context.reset().focus();
+      // 定位聚焦
+      context
+        .reset()
+        .focus();
+
+      // 触发事件
       context.__dispatchEvent('show');
 
       return context;
@@ -288,6 +309,29 @@
 
       return apply(context.show, context, arguments);
     },
+    __close: function(result) {
+      var context = this;
+
+      // 设置返回值
+      if (arguments.length >= 1) {
+        context.returnValue = result;
+      }
+
+      // 隐藏弹窗
+      context.__dialog
+        .hide()
+        .removeClass(this.className + '-show');
+
+      // 隐藏遮罩
+      if (context.modal) {
+        Mask.hide(context.node);
+
+        // 重置模态状态
+        context.modal = false;
+      }
+
+      context.open = false;
+    },
     /**
      * 关闭浮层
      * @param result
@@ -296,19 +340,7 @@
       var context = this;
 
       if (!context.destroyed && context.open) {
-        if (arguments.length >= 1) {
-          context.returnValue = result;
-        }
-
-        context.__dialog
-          .hide()
-          .removeClass(this.className + '-show');
-
-        Mask.hide(context.node);
-        Mask.node.removeClass(context.className + '-mask');
-
-        context.open = false;
-        context.modal = false;
+        apply(context.__close, context, arguments);
 
         // 恢复焦点，照顾键盘操作的用户
         context.blur();
@@ -335,7 +367,6 @@
 
       if (context.modal && context.open) {
         Mask.hide(context.node);
-        Mask.node.removeClass(context.className + '-mask');
       }
 
       // 从 DOM 中移除节点

@@ -6,7 +6,7 @@ export var Mask = {
   // 遮罩分配
   alloc: [],
   // 遮罩节点
-  node: $('<div tableindex="0"></div>').css({
+  node: $('<div class="ui-modal-dialog-mask" tableindex="0"></div>').css({
     position: 'fixed',
     top: 0,
     left: 0,
