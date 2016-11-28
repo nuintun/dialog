@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { Mask } from './mask';
 import * as Utils from './utils';
 
+var ALIGNSPLIT = /\s+/;
 var __window = $(window);
 var __document = $(document);
 
@@ -165,7 +166,7 @@ Dialog.prototype = {
     // 隐藏弹窗
     context.__dialog
       .hide()
-      .removeClass(this.className + '-show');
+      .removeClass(context.className + '-show');
 
     // 隐藏遮罩
     if (context.modal) {
@@ -185,8 +186,8 @@ Dialog.prototype = {
     var context = this;
 
     if (!context.destroyed && context.open) {
+      // 关闭
       Utils.apply(context.__close, context, arguments);
-
       // 恢复焦点，照顾键盘操作的用户
       context.blur();
       context.__dispatchEvent('close');
@@ -200,17 +201,23 @@ Dialog.prototype = {
   remove: function() {
     var context = this;
 
+    // 已销毁
     if (context.destroyed) {
       return context;
     }
 
-    context.__dispatchEvent('beforeremove');
+    // 移除
+    if (context.__dispatchEvent('beforeremove') === false) {
+      return context;
+    }
 
+    // 清理激活项
     if (Dialog.current === context) {
       Dialog.current = null;
     }
 
-    if (context.modal && context.open) {
+    // 隐藏遮罩
+    if (context.open && context.modal) {
       Mask.hide(context.node);
     }
 
@@ -218,6 +225,7 @@ Dialog.prototype = {
     context.__dialog.remove();
     context.__dispatchEvent('remove');
 
+    // 清理属性
     for (var i in context) {
       delete context[i];
     }
@@ -237,6 +245,7 @@ Dialog.prototype = {
       context.__center();
     }
 
+    // 触发事件
     context.__dispatchEvent('reset');
 
     return context;
@@ -268,13 +277,17 @@ Dialog.prototype = {
       context.__focus(autofocus);
     }
 
-    // 设置叠加高度
+    // 设置弹窗层级
     dialog.css('zIndex', index);
+    // 设置遮罩层级
+    Mask.node.css('zIndex', index);
 
+    // 保存当前激活实例
     Dialog.current = context;
 
+    // 添加激活类名
     dialog.addClass(context.className + '-focus');
-
+    // 触发事件
     context.__dispatchEvent('focus');
 
     return context;
@@ -347,16 +360,23 @@ Dialog.prototype = {
   },
   // 派发事件
   __dispatchEvent: function(type) {
+    var returned;
     var context = this;
     var listeners = context.__getEventListener(type);
 
     if (context['on' + type]) {
-      context['on' + type].call(context);
+      returned = context['on' + type].call(context);
     }
 
-    for (var i = 0; i < listeners.length; i++) {
-      listeners[i].call(context);
+    for (var i = 0, length = listeners.length; i < length; i++) {
+      if (returned === false) {
+        listeners[i].call(context);
+      } else {
+        returned = listeners[i].call(context);
+      }
     }
+
+    return returned;
   },
   /**
    * 对元素安全聚焦
@@ -417,7 +437,7 @@ Dialog.prototype = {
 
     anchor = anchor.parentNode && $(anchor);
 
-    if (!anchor) {
+    if (!anchor || !anchor.length) {
       return context.__center();
     }
 
@@ -453,30 +473,17 @@ Dialog.prototype = {
     var maxTop = minTop + clientHeight - height;
 
     var css = {};
-    var align = this.align.split(' ');
-    var className = this.className + '-';
+    var align = context.align.split(ALIGNSPLIT);
+    var className = context.className + '-';
     var reverse = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
     var name = { top: 'top', bottom: 'top', left: 'left', right: 'left' };
 
     var temp = [
-      {
-        top: top - height,
-        bottom: top + height,
-        left: left - width,
-        right: left + width
-      },
-      {
-        top: top,
-        bottom: top - height + height,
-        left: left,
-        right: left - width + width
-      }
+      { top: top - height, bottom: top + height, left: left - width, right: left + width },
+      { top: top, bottom: top - height + height, left: left, right: left - width + width }
     ];
 
-    var center = {
-      left: left + width / 2 - width / 2,
-      top: top + height / 2 - height / 2
-    };
+    var center = { left: left + width / 2 - width / 2, top: top + height / 2 - height / 2 };
 
     var range = {
       left: [minLeft, maxLeft],
@@ -503,17 +510,19 @@ Dialog.prototype = {
     }
 
     //添加follow的css, 为了给css使用
-    className += align.join('-') + ' ' + this.className + '-follow';
+    className += align.join('-') + ' ' + context.className + '-follow';
 
+    // 保存对齐类名
     context.__align = className;
 
-    if (anchor.length) {
-      dialog.addClass(className);
-    }
+    // 添加样式
+    dialog.addClass(className);
 
+    // 设置样式属性
     css[name[align[0]]] = parseInt(temp[0][align[0]]);
     css[name[align[1]]] = parseInt(temp[1][align[1]]);
 
+    // 设置样式
     dialog.css(css);
   },
   /**
