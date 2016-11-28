@@ -12,9 +12,9 @@ export default function Dialog() {
   context.node = document.createElement('div');
   context.__dialog = $(context.node)
     .css({
-      outline: 0,
       display: 'none',
-      position: 'absolute'
+      position: 'absolute',
+      outline: 0
     })
     .attr('tabindex', '-1')
     .html(context.innerHTML)
