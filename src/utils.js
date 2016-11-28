@@ -4,32 +4,6 @@ var APIndexOf = AP.indexOf;
 var APForEach = AP.forEach;
 
 /**
- * apply
- * @param  {Function} fn
- * @param  {Any} context
- * @param  {Array} args
- * call is faster than apply, optimize less than 6 args
- * https://github.com/micro-js/apply
- * http://blog.csdn.net/zhengyinhui100/article/details/7837127
- */
-export function apply(fn, context, args) {
-  switch (args.length) {
-    // faster
-    case 0:
-      return fn.call(context);
-    case 1:
-      return fn.call(context, args[0]);
-    case 2:
-      return fn.call(context, args[0], args[1]);
-    case 3:
-      return fn.call(context, args[0], args[1], args[2]);
-    default:
-      // slower
-      return fn.apply(context, args);
-  }
-}
-
-/**
  * filter
  * @param {any} array
  * @param {any} iterator

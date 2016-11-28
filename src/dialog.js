@@ -67,7 +67,7 @@ Dialog.prototype = {
   // 判断对话框是否显示
   open: false,
   // close 返回值
-  returnValue: '',
+  returnValue: undefined,
   // 是否自动聚焦
   autofocus: true,
   // 对齐方式[*]
@@ -150,18 +150,18 @@ Dialog.prototype = {
    * 显示模态浮层。
    * 参数参见 show()
    */
-  showModal: function() {
+  showModal: function(anchor) {
     var context = this;
 
     context.modal = true;
 
-    return Utils.apply(context.show, context, arguments);
+    return context.show(anchor);
   },
-  __close: function(result) {
+  __close: function(result, animation) {
     var context = this;
 
     // 设置返回值
-    if (arguments.length >= 1) {
+    if (result !== undefined) {
       context.returnValue = result;
     }
 
@@ -171,13 +171,15 @@ Dialog.prototype = {
     dialog.removeClass(context.className + '-show');
 
     // CSS3动画
-    if (Utils.CSS3ANIMEVENTS) {
+    if (animation && Utils.CSS3ANIMEVENTS) {
       var next = function() {
+        // 动画结束事件
+        context.__dispatchEvent('animationend');
+
         dialog
           .hide()
           .off(Utils.CSS3ANIMEVENTS, next)
           .removeClass(context.className + '-close');
-
       };
 
       dialog
@@ -206,7 +208,7 @@ Dialog.prototype = {
 
     if (!context.destroyed && context.open) {
       // 关闭
-      Utils.apply(context.__close, context, arguments);
+      context.__close(result, true);
       // 恢复焦点，照顾键盘操作的用户
       context.blur();
       context.__dispatchEvent('close');

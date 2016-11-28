@@ -12,32 +12,6 @@
   var APForEach = AP.forEach;
 
   /**
-   * apply
-   * @param  {Function} fn
-   * @param  {Any} context
-   * @param  {Array} args
-   * call is faster than apply, optimize less than 6 args
-   * https://github.com/micro-js/apply
-   * http://blog.csdn.net/zhengyinhui100/article/details/7837127
-   */
-  function apply(fn, context, args) {
-    switch (args.length) {
-      // faster
-      case 0:
-        return fn.call(context);
-      case 1:
-        return fn.call(context, args[0]);
-      case 2:
-        return fn.call(context, args[0], args[1]);
-      case 3:
-        return fn.call(context, args[0], args[1], args[2]);
-      default:
-        // slower
-        return fn.apply(context, args);
-    }
-  }
-
-  /**
    * filter
    * @param {any} array
    * @param {any} iterator
@@ -263,7 +237,7 @@
     // 判断对话框是否显示
     open: false,
     // close 返回值
-    returnValue: '',
+    returnValue: undefined,
     // 是否自动聚焦
     autofocus: true,
     // 对齐方式[*]
@@ -346,18 +320,18 @@
      * 显示模态浮层。
      * 参数参见 show()
      */
-    showModal: function() {
+    showModal: function(anchor) {
       var context = this;
 
       context.modal = true;
 
-      return apply(context.show, context, arguments);
+      return context.show(anchor);
     },
-    __close: function(result) {
+    __close: function(result, animation) {
       var context = this;
 
       // 设置返回值
-      if (arguments.length >= 1) {
+      if (result !== undefined) {
         context.returnValue = result;
       }
 
@@ -367,13 +341,15 @@
       dialog.removeClass(context.className + '-show');
 
       // CSS3动画
-      if (CSS3ANIMEVENTS) {
+      if (animation && CSS3ANIMEVENTS) {
         var next = function() {
+          // 动画结束事件
+          context.__dispatchEvent('animationend');
+
           dialog
             .hide()
             .off(CSS3ANIMEVENTS, next)
             .removeClass(context.className + '-close');
-
         };
 
         dialog
@@ -402,7 +378,7 @@
 
       if (!context.destroyed && context.open) {
         // 关闭
-        apply(context.__close, context, arguments);
+        context.__close(result, true);
         // 恢复焦点，照顾键盘操作的用户
         context.blur();
         context.__dispatchEvent('close');
