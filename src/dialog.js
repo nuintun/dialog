@@ -378,7 +378,7 @@ Dialog.prototype = {
    */
   __follow: function(anchor) {
     var context = this;
-    var dialog = this.__dialog;
+    var dialog = context.__dialog;
 
     if (context.__followSkin) {
       dialog.removeClass(context.__followSkin);
@@ -386,11 +386,15 @@ Dialog.prototype = {
 
     anchor = anchor.parentNode && $(anchor);
 
+    if (!anchor) {
+      return context.__center();
+    }
+
     // 隐藏元素不可用
     if (anchor) {
-      var o = anchor.offset();
+      var offset = anchor.offset();
 
-      if (o.left * o.top < 0) {
+      if (offset.left * offset.top < 0) {
         return context.__center();
       }
     }
@@ -406,7 +410,7 @@ Dialog.prototype = {
     var height = dialog.height();
     var width = anchor ? anchor.outerWidth() : 0;
     var height = anchor ? anchor.outerHeight() : 0;
-    var offset = this.__offset(anchor[0]);
+    var offset = context.__offset(anchor[0]);
     var x = offset.left;
     var y = offset.top;
     var left = fixed ? x - scrollLeft : x;

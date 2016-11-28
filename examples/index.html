@@ -7,13 +7,14 @@
   <script src="js/jquery.js"></script>
 </head>
 <body>
+  <button id="button">button</button>
   <script src="../dist/dialog.min.js"></script>
   <script>
     var dialog = new Dialog();
 
     dialog.innerHTML = 'hello world';
 
-    dialog.showModal();
+    dialog.showModal(document.getElementById('button'));
   </script>
 </body>
 </html>
