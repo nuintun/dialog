@@ -9,6 +9,7 @@
   var AP = Array.prototype;
   var APFilter = AP.filter;
   var APIndexOf = AP.indexOf;
+  var APForEach = AP.forEach;
   /**
    * type
    * @param {any} value
@@ -33,7 +34,22 @@
    * https://github.com/micro-js/apply
    * http://blog.csdn.net/zhengyinhui100/article/details/7837127
    */
-
+  function apply(fn, context, args) {
+    switch (args.length) {
+      // faster
+      case 0:
+        return fn.call(context);
+      case 1:
+        return fn.call(context, args[0]);
+      case 2:
+        return fn.call(context, args[0], args[1]);
+      case 3:
+        return fn.call(context, args[0], args[1], args[2]);
+      default:
+        // slower
+        return fn.apply(context, args);
+    }
+  }
 
   /**
    * filter
@@ -102,6 +118,17 @@
    * @param {any} iterator
    * @param {any} context
    */
+  var forEach = APForEach ? function(array, iterator, context) {
+    APForEach.call(array, iterator, context);
+  } : function(array, iterator, context) {
+    if (arguments.length < 3) {
+      context = array;
+    }
+
+    for (var i = 0, length = array.length; i < length; i++) {
+      iterator.call(array, array[i], i, array);
+    }
+  };
 
   var Mask = {
     reference: [],
@@ -127,10 +154,14 @@
     }
   };
 
+  var __window = $(window);
+  var __document = $(document);
+
   function Dialog() {
     var context = this;
 
     context.node = document.createElement('div');
+    context.__dialog = $(context.node);
   }
 
   Dialog.prototype = {
@@ -192,8 +223,8 @@
         return context;
       }
 
-      var node = context.node;
-      var mask = Mask.mask;
+      var mask = Mask.node;
+      var dialog = context.__dialog;
 
       context.open = true;
       context.follow = anchor || context.follow;
@@ -201,7 +232,7 @@
 
       // 初始化 show 方法
       if (!context.__ready) {
-        node
+        dialog
           .addClass(context.className)
           .attr('role', context.modal ? 'modal-dialog' : 'dialog')
           .css('position', context.fixed ? 'fixed' : 'absolute');
@@ -210,25 +241,415 @@
         if (context.modal) {
           context.__ready = true;
 
-          node.addClass(context.className + '-modal');
+          dialog.addClass(context.className + '-modal');
+          mask.show();
         }
 
-        if (!node.html()) {
-          node.html(context.innerHTML);
+        if (!dialog.html()) {
+          dialog.html(context.innerHTML);
         }
       }
 
-      node
+      dialog
         .addClass(context.className + '-show')
         .show();
 
-      backdrop.show();
       context.reset().focus();
-      context.emit('show');
+      context.__dispatchEvent('show');
 
       return context;
     },
+    /**
+     * 显示模态浮层。
+     * 参数参见 show()
+     */
+    showModal: function() {
+      var context = this;
+
+      context.modal = true;
+
+      return apply(context.show, context, arguments);
+    },
+    /**
+     * 关闭浮层
+     * @param result
+     */
+    close: function(result) {
+      var context = this;
+
+      if (!context.destroyed && context.open) {
+        if (arguments.length >= 1) {
+          context.returnValue = result;
+        }
+
+        context.__dialog
+          .hide()
+          .removeClass(this.className + '-show');
+        Mask.node.hide();
+        context.open = false;
+        context.blur(); // 恢复焦点，照顾键盘操作的用户
+        context.__dispatchEvent('close');
+      }
+
+      return context;
+    },
+    /**
+     * 销毁浮层
+     */
+    remove: function() {
+      var context = this;
+
+      if (context.destroyed) {
+        return context;
+      }
+
+      context.__dispatchEvent('beforeremove');
+
+      if (Dialog.current === this) {
+        Dialog.current = null;
+      }
+
+      // 从 DOM 中移除节点
+      context.__dialog.remove();
+      context.__dispatchEvent('remove');
+
+      for (var i in context) {
+        delete context[i];
+      }
+
+      return context;
+    },
+    /**
+     * 重置位置
+     */
+    reset: function() {
+      var context = this;
+      var follow = context.follow;
+
+      if (follow) {
+        context.__follow(follow);
+      } else {
+        context.__center();
+      }
+
+      context.__dispatchEvent('reset');
+
+      return context;
+    },
+    /**
+     * 让浮层获取焦点
+     */
+    focus: function() {
+      var context = this;
+      var node = context.node;
+      var dialog = context.__dialog;
+      var current = Dialog.current;
+      var index = context.zIndex = Dialog.zIndex++;
+
+      if (current && current !== this) {
+        current.blur(false);
+      }
+
+      // 检查焦点是否在浮层里面
+      if (!$.contains(node, context.__getActive())) {
+        var autofocus = dialog.find('[autofocus]')[0];
+
+        if (!context._autofocus && autofocus) {
+          context._autofocus = true;
+        } else {
+          autofocus = node;
+        }
+
+        context.__focus(autofocus);
+      }
+
+      // 设置叠加高度
+      dialog.css('zIndex', index);
+
+      Dialog.current = this;
+
+      dialog.addClass(this.className + '-focus');
+
+      context.__dispatchEvent('focus');
+
+      return context;
+    },
+    /**
+     * 让浮层失去焦点。将焦点退还给之前的元素，照顾视力障碍用户
+     */
+    blur: function() {
+      var context = this;
+      var activeElement = context.__activeElement;
+      var isBlur = arguments[0];
+
+      if (isBlur !== false) {
+        context.__focus(activeElement);
+      }
+
+      context._autofocus = false;
+      context.__dialog.removeClass(context.className + '-focus');
+      context.__dispatchEvent('blur');
+
+      return context;
+    },
+    /**
+     * 添加事件
+     * @param   {String}    事件类型
+     * @param   {Function}  监听函数
+     */
+    addEventListener: function(type$$1, callback) {
+      var context = this;
+
+      context.
+      __getEventListener(type$$1)
+        .push(callback);
+
+      return context;
+    },
+    /**
+     * 删除事件
+     * @param   {String}    事件类型
+     * @param   {Function}  监听函数
+     */
+    removeEventListener: function(type$$1, callback) {
+      var context = this;
+      var listeners = context.__getEventListener(type$$1);
+
+      for (var i = 0; i < listeners.length; i++) {
+        if (callback === listeners[i]) {
+          listeners.splice(i--, 1);
+        }
+      }
+
+      return context;
+    },
+    /**
+     * 获取事件缓存
+     */
+    __getEventListener: function(type$$1) {
+      var context = this;
+      var listener = context.__listener;
+
+      if (!listener) {
+        listener = context.__listener = {};
+      }
+
+      if (!listener[type$$1]) {
+        listener[type$$1] = [];
+      }
+
+      return listener[type$$1];
+    },
+    // 派发事件
+    __dispatchEvent: function(type$$1) {
+      var context = this;
+      var listeners = context.__getEventListener(type$$1);
+
+      if (context['on' + type$$1]) {
+        context['on' + type$$1].call(context);
+      }
+
+      for (var i = 0; i < listeners.length; i++) {
+        listeners[i].call(context);
+      }
+    },
+    /**
+     * 对元素安全聚焦
+     */
+    __focus: function(element) {
+      // 防止 iframe 跨域无权限报错
+      // 防止 IE 不可见元素报错
+      try {
+        // ie11 bug: iframe 页面点击会跳到顶部
+        if (this.autofocus && !/^iframe$/i.test(element.nodeName)) {
+          element.focus();
+        }
+      } catch (e) {
+        // error
+      }
+    },
+    // 获取当前焦点的元素
+    __getActive: function() {
+      try { // try: ie8~9, iframe #26
+        var activeElement = document.activeElement;
+        var contentDocument = activeElement.contentDocument;
+        var element = contentDocument && contentDocument.activeElement || activeElement;
+
+        return element;
+      } catch (e) {
+        // error
+      }
+    },
+    // 居中浮层
+    __center: function() {
+      var context = this;
+      var dialog = context.__dialog;
+      var fixed = context.fixed;
+      var scrollLeft = fixed ? 0 : __document.scrollLeft();
+      var scrollTop = fixed ? 0 : __document.scrollTop();
+      var clientWidth = __window.width();
+      var clientHeight = __window.height();
+      var width = dialog.width();
+      var height = dialog.height();
+      var left = (clientWidth - width) / 2 + scrollLeft;
+      var top = (clientHeight - height) * 382 / 1000 + scrollTop; // 黄金比例
+      var style = context.node.style;
+
+      style.left = Math.max(parseInt(left), scrollLeft) + 'px';
+      style.top = Math.max(parseInt(top), scrollTop) + 'px';
+    },
+    /**
+     * 指定位置
+     * @param    {HTMLElement, Event}  anchor
+     */
+    __follow: function(anchor) {
+      var context = this;
+      var dialog = this.__dialog;
+
+      if (context.__followSkin) {
+        dialog.removeClass(context.__followSkin);
+      }
+
+      anchor = anchor.parentNode && $(anchor);
+
+      // 隐藏元素不可用
+      if (anchor) {
+        var o = anchor.offset();
+
+        if (o.left * o.top < 0) {
+          return context.__center();
+        }
+      }
+
+      var fixed = context.fixed;
+
+      var clientWidth = __window.width();
+      var clientHeight = __window.height();
+      var scrollLeft = __document.scrollLeft();
+      var scrollTop = __document.scrollTop();
+
+      var width = dialog.width();
+      var height = dialog.height();
+      var width = anchor ? anchor.outerWidth() : 0;
+      var height = anchor ? anchor.outerHeight() : 0;
+      var offset = this.__offset(anchor[0]);
+      var x = offset.left;
+      var y = offset.top;
+      var left = fixed ? x - scrollLeft : x;
+      var top = fixed ? y - scrollTop : y;
+
+      var minLeft = fixed ? 0 : scrollLeft;
+      var minTop = fixed ? 0 : scrollTop;
+      var maxLeft = minLeft + clientWidth - width;
+      var maxTop = minTop + clientHeight - height;
+
+      var css = {};
+      var align = this.align.split(' ');
+      var className = this.className + '-';
+      var reverse = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' };
+      var name = { top: 'top', bottom: 'top', left: 'left', right: 'left' };
+
+      var temp = [
+        {
+          top: top - height,
+          bottom: top + height,
+          left: left - width,
+          right: left + width
+        },
+        {
+          top: top,
+          bottom: top - height + height,
+          left: left,
+          right: left - width + width
+        }
+      ];
+
+      var center = {
+        left: left + width / 2 - width / 2,
+        top: top + height / 2 - height / 2
+      };
+
+      var range = {
+        left: [minLeft, maxLeft],
+        top: [minTop, maxTop]
+      };
+
+      // 超出可视区域重新适应位置
+      forEach(align, function(value, i) {
+        // 超出右或下边界：使用左或者上边对齐
+        if (temp[i][value] > range[name[value]][1]) {
+          value = align[i] = reverse[value];
+        }
+
+        // 超出左或右边界：使用右或者下边对齐
+        if (temp[i][value] < range[name[value]][0]) {
+          align[i] = reverse[value];
+        }
+      });
+
+      // 一个参数的情况
+      if (!align[1]) {
+        name[align[1]] = name[align[0]] === 'left' ? 'top' : 'left';
+        temp[1][align[1]] = center[name[align[1]]];
+      }
+
+      //添加follow的css, 为了给css使用
+      className += align.join('-') + ' ' + this.className + '-follow';
+
+      context.__followSkin = className;
+
+      if (anchor.length) {
+        dialog.addClass(className);
+      }
+
+      css[name[align[0]]] = parseInt(temp[0][align[0]]);
+      css[name[align[1]]] = parseInt(temp[1][align[1]]);
+
+      dialog.css(css);
+    },
+    /**
+     * 获取元素相对于页面的位置（包括iframe内的元素）
+     * 暂时不支持两层以上的 iframe 套嵌
+     */
+    __offset: function(anchor) {
+      var isNode = anchor.parentNode;
+      var offset = isNode ? $(anchor).offset() : {
+        left: anchor.pageX,
+        top: anchor.pageY
+      };
+
+      anchor = isNode ? anchor : anchor.target;
+
+      var ownerDocument = anchor.ownerDocument;
+      var defaultView = ownerDocument.defaultView || ownerDocument.parentWindow;
+
+      if (defaultView == window) {
+        // IE <= 8 只能使用两个等于号
+        return offset;
+      }
+
+      ownerDocument = $(ownerDocument);
+
+      var scrollLeft = ownerDocument.scrollLeft();
+      var scrollTop = ownerDocument.scrollTop();
+
+      // {Element: Ifarme}
+      var frameElement = defaultView.frameElement;
+      var frameOffset = $(frameElement).offset();
+      var frameLeft = frameOffset.left;
+      var frameTop = frameOffset.top;
+
+      return {
+        left: offset.left + frameLeft - scrollLeft,
+        top: offset.top + frameTop - scrollTop
+      };
+    }
   };
+
+  // 当前叠加高度
+  Dialog.zIndex = 1024;
+  // 顶层浮层的实例
+  Dialog.current = null;
 
   return Dialog;
 
