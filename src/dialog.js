@@ -91,7 +91,7 @@ Dialog.prototype = {
         context.__ready = true;
 
         dialog.addClass(context.className + '-modal');
-        mask.show();
+        mask.show(context.node);
       }
 
       if (!dialog.html()) {
@@ -134,7 +134,7 @@ Dialog.prototype = {
       context.__dialog
         .hide()
         .removeClass(this.className + '-show');
-      Mask.node.hide();
+      Mask.hide(context.node);
 
       context.open = false;
       context.modal = false;
@@ -160,6 +160,10 @@ Dialog.prototype = {
 
     if (Dialog.current === this) {
       Dialog.current = null;
+    }
+
+    if (context.modal && context.open) {
+      Mask.hide(context.node);
     }
 
     // 从 DOM 中移除节点

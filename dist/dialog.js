@@ -131,25 +131,33 @@
   };
 
   var Mask = {
-    reference: [],
+    alloc: [],
     node: $('<div class="ui-dialog-mask" tableindex="0"></div>'),
-    show: function(target) {
-      if (indexOf(Mask.reference, target) === -1) {
-        Mask.reference.push(target);
-        Mask.node.insertBefore(target);
+    /**
+     * show
+     * @param {any} anchor
+     */
+    show: function(anchor) {
+      if (indexOf(Mask.alloc, anchor) === -1) {
+        Mask.alloc.push(anchor);
+        Mask.node.insertBefore(anchor);
       }
     },
-    hide: function(target) {
-      Mask.reference = filter(Mask.reference, function(element) {
-        return target !== element;
+    /**
+     * hide
+     * @param {any} anchor
+     */
+    hide: function(anchor) {
+      Mask.alloc = filter(Mask.alloc, function(element) {
+        return anchor !== element;
       });
 
-      var length = Mask.reference.length;
+      var length = Mask.alloc.length;
 
       if (length === 0) {
         Mask.node.remove();
       } else {
-        Mask.node.insertBefore(Mask.reference[length - 1]);
+        Mask.node.insertBefore(Mask.alloc[length - 1]);
       }
     }
   };
@@ -242,7 +250,7 @@
           context.__ready = true;
 
           dialog.addClass(context.className + '-modal');
-          mask.show();
+          mask.show(context.node);
         }
 
         if (!dialog.html()) {
@@ -285,7 +293,7 @@
         context.__dialog
           .hide()
           .removeClass(this.className + '-show');
-        Mask.node.hide();
+        Mask.hide(context.node);
 
         context.open = false;
         context.modal = false;
@@ -311,6 +319,10 @@
 
       if (Dialog.current === this) {
         Dialog.current = null;
+      }
+
+      if (context.modal && context.open) {
+        Mask.hide(context.node);
       }
 
       // 从 DOM 中移除节点

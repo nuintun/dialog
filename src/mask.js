@@ -2,25 +2,33 @@ import $ from 'jquery';
 import * as Utils from './utils';
 
 export var Mask = {
-  reference: [],
+  alloc: [],
   node: $('<div class="ui-dialog-mask" tableindex="0"></div>'),
-  show: function(target) {
-    if (Utils.indexOf(Mask.reference, target) === -1) {
-      Mask.reference.push(target);
-      Mask.node.insertBefore(target);
+  /**
+   * show
+   * @param {any} anchor
+   */
+  show: function(anchor) {
+    if (Utils.indexOf(Mask.alloc, anchor) === -1) {
+      Mask.alloc.push(anchor);
+      Mask.node.insertBefore(anchor);
     }
   },
-  hide: function(target) {
-    Mask.reference = Utils.filter(Mask.reference, function(element) {
-      return target !== element;
+  /**
+   * hide
+   * @param {any} anchor
+   */
+  hide: function(anchor) {
+    Mask.alloc = Utils.filter(Mask.alloc, function(element) {
+      return anchor !== element;
     });
 
-    var length = Mask.reference.length;
+    var length = Mask.alloc.length;
 
     if (length === 0) {
       Mask.node.remove();
     } else {
-      Mask.node.insertBefore(Mask.reference[length - 1]);
+      Mask.node.insertBefore(Mask.alloc[length - 1]);
     }
   }
 };
