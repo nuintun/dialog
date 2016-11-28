@@ -107,3 +107,42 @@ export var forEach = APForEach ? function(array, iterator, context) {
     iterator.call(array, array[i], i, array);
   }
 }
+
+// CSS3动画事件
+export var CSS3ANIMEVENTS = (function() {
+  var events;
+  var property;
+  var style = document.documentElement.style;
+
+  var animations = {
+    'WebkitAnimation': 'webkitAnimationEnd',
+    'OAnimation': 'oAnimationEnd',
+    'msAnimation': 'MSAnimationEnd',
+    'animation': 'animationend'
+  };
+
+  var transitions = {
+    'WebkitTransition': 'webkitTransitionEnd',
+    'OTransition': 'oTransitionEnd',
+    'msTransition': 'MSTransitionEnd',
+    'transition': 'transitionend'
+  };
+
+  // animations
+  for (property in animations) {
+    if (style.hasOwnProperty(property)) {
+      events = animations[property];
+      break;
+    }
+  }
+
+  // transitions
+  for (property in transitions) {
+    if (style.hasOwnProperty(property)) {
+      events += (events ? ' ' : '') + transitions[property];
+      break;
+    }
+  }
+
+  return events;
+}());

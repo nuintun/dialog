@@ -116,6 +116,45 @@
     }
   };
 
+  // CSS3动画事件
+  var CSS3ANIMEVENTS = (function() {
+    var events;
+    var property;
+    var style = document.documentElement.style;
+
+    var animations = {
+      'WebkitAnimation': 'webkitAnimationEnd',
+      'OAnimation': 'oAnimationEnd',
+      'msAnimation': 'MSAnimationEnd',
+      'animation': 'animationend'
+    };
+
+    var transitions = {
+      'WebkitTransition': 'webkitTransitionEnd',
+      'OTransition': 'oTransitionEnd',
+      'msTransition': 'MSTransitionEnd',
+      'transition': 'transitionend'
+    };
+
+    // animations
+    for (property in animations) {
+      if (style.hasOwnProperty(property)) {
+        events = animations[property];
+        break;
+      }
+    }
+
+    // transitions
+    for (property in transitions) {
+      if (style.hasOwnProperty(property)) {
+        events += (events ? ' ' : '') + transitions[property];
+        break;
+      }
+    }
+
+    return events;
+  }());
+
   // 公用遮罩
   var Mask = {
     // 遮罩分配
@@ -322,10 +361,27 @@
         context.returnValue = result;
       }
 
+      var dialog = context.__node;
+
       // 隐藏弹窗
-      context.__node
-        .hide()
-        .removeClass(context.className + '-show');
+      dialog.removeClass(context.className + '-show');
+
+      // CSS3动画
+      if (CSS3ANIMEVENTS) {
+        var next = function() {
+          dialog
+            .hide()
+            .off(CSS3ANIMEVENTS, next)
+            .removeClass(context.className + '-close');
+
+        };
+
+        dialog
+          .on(CSS3ANIMEVENTS, next)
+          .addClass(context.className + '-close');
+      } else {
+        dialog.hide();
+      }
 
       // 隐藏遮罩
       if (context.modal) {
@@ -385,8 +441,8 @@
       context.__dispatchEvent('remove');
 
       // 清理属性
-      for (var i in context) {
-        delete context[i];
+      for (var property in context) {
+        delete context[property];
       }
 
       return context;

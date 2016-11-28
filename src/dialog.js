@@ -165,10 +165,27 @@ Dialog.prototype = {
       context.returnValue = result;
     }
 
+    var dialog = context.__node;
+
     // 隐藏弹窗
-    context.__node
-      .hide()
-      .removeClass(context.className + '-show');
+    dialog.removeClass(context.className + '-show');
+
+    // CSS3动画
+    if (Utils.CSS3ANIMEVENTS) {
+      var next = function() {
+        dialog
+          .hide()
+          .off(Utils.CSS3ANIMEVENTS, next)
+          .removeClass(context.className + '-close');
+
+      };
+
+      dialog
+        .on(Utils.CSS3ANIMEVENTS, next)
+        .addClass(context.className + '-close');
+    } else {
+      dialog.hide();
+    }
 
     // 隐藏遮罩
     if (context.modal) {
@@ -228,8 +245,8 @@ Dialog.prototype = {
     context.__dispatchEvent('remove');
 
     // 清理属性
-    for (var i in context) {
-      delete context[i];
+    for (var property in context) {
+      delete context[property];
     }
 
     return context;

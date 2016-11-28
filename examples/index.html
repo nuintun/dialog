@@ -6,13 +6,24 @@
     <link type="text/css" rel="stylesheet" href="css/dialog.css" />
     <script src="js/jquery.js"></script>
     <script src="../dist/dialog.min.js"></script>
+    <style>
+      .ui-dialog-content {
+        color: red;
+        background: #000;
+        padding: 10px;
+        width: 500px;
+        height: 300px;
+        text-align: center;
+        line-height: 300px;
+      }
+    </style>
   </head>
   <body>
     <button id="button" style="margin: 100px 0 0 200px;">button</button>
     <script>
       var dialog = new Dialog();
 
-      dialog.innerHTML = '<div style="color: red; background: #000; padding: 10px;">hello, world</div>';
+      dialog.innerHTML = '<div class="ui-dialog-content">hello, world</div>';
 
       dialog.addEventListener('focus', function() {
         console.log('focus');
@@ -42,8 +53,9 @@
 
       setTimeout(function() {
         dialog.close();
-        dialog.remove();
+        // dialog.remove();
       }, 3000);
+
     </script>
   </body>
 </html>
