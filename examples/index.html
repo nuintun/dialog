@@ -1,20 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Dialog</title>
-  <link type="text/css" rel="stylesheet" href="css/dialog.css"/>
-  <script src="js/jquery.js"></script>
-  <script src="../dist/dialog.min.js"></script>
-</head>
-<body>
-  <button id="button" style="margin: 100px 0 0 200px;">button</button>
-  <script>
-    var dialog = new Dialog();
+  <head>
+    <meta charset="UTF-8">
+    <title>Dialog</title>
+    <link type="text/css" rel="stylesheet" href="css/dialog.css" />
+    <script src="js/jquery.js"></script>
+    <script src="../dist/dialog.min.js"></script>
+  </head>
+  <body>
+    <button id="button" style="margin: 100px 0 0 200px;">button</button>
+    <script>
+      var dialog = new Dialog();
 
-    dialog.innerHTML = 'hello world';
+      dialog.innerHTML = 'hello world';
 
-    dialog.showModal(document.getElementById('button'));
-  </script>
-</body>
+      dialog.addEventListener('focus', function() {
+        console.log('focus');
+      });
+
+      dialog.addEventListener('blur', function() {
+        console.log('blur');
+      });
+
+      dialog.addEventListener('show', function() {
+        console.log('show');
+      });
+
+      dialog.addEventListener('close', function() {
+        console.log('close');
+      });
+
+      dialog.addEventListener('beforeremove', function() {
+        console.log('beforeremove');
+      });
+
+      dialog.addEventListener('remove', function() {
+        console.log('remove');
+      });
+
+      dialog.showModal(document.getElementById('button'));
+
+      setTimeout(function() {
+        dialog.close();
+        dialog.remove();
+      }, 3000);
+    </script>
+  </body>
 </html>

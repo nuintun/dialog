@@ -168,7 +168,7 @@
 
     context.destroyed = false;
     context.node = document.createElement('div');
-    context.__dialog = $(context.node)
+    context.__node = $(context.node)
       .css({
         display: 'none',
         position: 'absolute',
@@ -181,6 +181,8 @@
   Dialog.zIndex = 1024;
   // 顶层浮层的实例
   Dialog.current = null;
+  // 遮罩
+  Dialog.mask = Mask.node;
 
   // 原型属性
   Dialog.prototype = {
@@ -248,7 +250,7 @@
         context.__close();
       }
 
-      var dialog = context.__dialog;
+      var dialog = context.__node;
 
       context.open = true;
       context.follow = anchor || context.follow;
@@ -321,7 +323,7 @@
       }
 
       // 隐藏弹窗
-      context.__dialog
+      context.__node
         .hide()
         .removeClass(context.className + '-show');
 
@@ -379,7 +381,7 @@
       }
 
       // 从 DOM 中移除节点
-      context.__dialog.remove();
+      context.__node.remove();
       context.__dispatchEvent('remove');
 
       // 清理属性
@@ -414,7 +416,7 @@
       var context = this;
       var node = context.node;
       var current = Dialog.current;
-      var dialog = context.__dialog;
+      var dialog = context.__node;
       var index = context.zIndex = Dialog.zIndex++;
 
       if (current && current !== this) {
@@ -462,7 +464,7 @@
       }
 
       context._autofocus = false;
-      context.__dialog.removeClass(context.className + '-focus');
+      context.__node.removeClass(context.className + '-focus');
       context.__dispatchEvent('blur');
 
       return context;
@@ -476,7 +478,7 @@
       var context = this;
 
       context
-        .__getEventListener(type)
+        .__getEventListeners(type)
         .push(callback);
 
       return context;
@@ -488,7 +490,7 @@
      */
     removeEventListener: function(type, callback) {
       var context = this;
-      var listeners = context.__getEventListener(type);
+      var listeners = context.__getEventListeners(type);
 
       for (var i = 0; i < listeners.length; i++) {
         if (callback === listeners[i]) {
@@ -501,25 +503,25 @@
     /**
      * 获取事件缓存
      */
-    __getEventListener: function(type) {
+    __getEventListeners: function(type) {
       var context = this;
-      var listener = context.__listener;
+      var listeners = context.__listeners;
 
-      if (!listener) {
-        listener = context.__listener = {};
+      if (!listeners) {
+        listeners = context.__listeners = {};
       }
 
-      if (!listener[type]) {
-        listener[type] = [];
+      if (!listeners[type]) {
+        listeners[type] = [];
       }
 
-      return listener[type];
+      return listeners[type];
     },
     // 派发事件
     __dispatchEvent: function(type) {
       var returned;
       var context = this;
-      var listeners = context.__getEventListener(type);
+      var listeners = context.__getEventListeners(type);
 
       if (context['on' + type]) {
         returned = context['on' + type].call(context);
@@ -565,7 +567,7 @@
     // 居中浮层
     __center: function() {
       var context = this;
-      var dialog = context.__dialog;
+      var dialog = context.__node;
       var fixed = context.fixed;
       var scrollLeft = fixed ? 0 : __document.scrollLeft();
       var scrollTop = fixed ? 0 : __document.scrollTop();
@@ -586,7 +588,7 @@
      */
     __follow: function(anchor) {
       var context = this;
-      var dialog = context.__dialog;
+      var dialog = context.__node;
 
       if (context.__align) {
         dialog.removeClass(context.__align);
