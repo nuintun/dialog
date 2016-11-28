@@ -130,12 +130,15 @@
     }
   };
 
+  // 公用遮罩
   var Mask = {
+    // 遮罩分配
     alloc: [],
+    // 遮罩节点
     node: $('<div class="ui-dialog-mask" tableindex="0"></div>'),
     /**
-     * show
-     * @param {any} anchor
+     * 显示遮罩
+     * @param {HTMLElement} anchor 定位节点
      */
     show: function(anchor) {
       if (indexOf(Mask.alloc, anchor) === -1) {
@@ -144,8 +147,8 @@
       }
     },
     /**
-     * hide
-     * @param {any} anchor
+     * 隐藏遮罩
+     * @param {HTMLElement} anchor 定位节点
      */
     hide: function(anchor) {
       Mask.alloc = filter(Mask.alloc, function(element) {
@@ -172,6 +175,12 @@
     context.__dialog = $(context.node);
   }
 
+  // 当前叠加高度
+  Dialog.zIndex = 1024;
+  // 顶层浮层的实例
+  Dialog.current = null;
+
+  // 原型属性
   Dialog.prototype = {
     /**
      * 初始化完毕事件，在 show()、showModal() 执行
@@ -661,11 +670,6 @@
       };
     }
   };
-
-  // 当前叠加高度
-  Dialog.zIndex = 1024;
-  // 顶层浮层的实例
-  Dialog.current = null;
 
   return Dialog;
 

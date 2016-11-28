@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { Mask } from './mask';
-import { Cache } from './cache';
 import * as Utils from './utils';
 
 var __window = $(window);
@@ -13,6 +12,12 @@ export default function Dialog() {
   context.__dialog = $(context.node);
 }
 
+// 当前叠加高度
+Dialog.zIndex = 1024;
+// 顶层浮层的实例
+Dialog.current = null;
+
+// 原型属性
 Dialog.prototype = {
   /**
    * 初始化完毕事件，在 show()、showModal() 执行
@@ -502,8 +507,3 @@ Dialog.prototype = {
     };
   }
 };
-
-// 当前叠加高度
-Dialog.zIndex = 1024;
-// 顶层浮层的实例
-Dialog.current = null;
