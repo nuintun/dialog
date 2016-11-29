@@ -66,14 +66,14 @@
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=65);
 }
 :root .ui-modal-dialog-mask {
-  filter: none \9;
+  filter: none\9;
 }
 .ui-dialog {
   /* http://ued.taobao.com/blog/2011/04/onfocus-this-blur/ */
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
-  -webkit-animation-duration: .2s;
-  animation-duration: .2s;
+  -webkit-animation-duration: .3s;
+  animation-duration: .3s;
 }
 .ui-dialog-show {
   -webkit-animation-name: bounceIn;
