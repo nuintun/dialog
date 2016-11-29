@@ -62,8 +62,10 @@ Dialog.prototype = {
    * @name Popup.prototype.onblur
    * @event
    */
-  // 浮层 DOM 素节点[*]
+  // 浮层 DOM 元素节点[*]
   node: null,
+  // 跟随的 DOM 元素节点[*]
+  follow: null,
   // 是否开启固定定位[*]
   fixed: false,
   // 判断对话框是否删除[*]
