@@ -95,64 +95,52 @@
   // 浏览器前缀
   var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
 
+  /**
+   * modernizr
+   * @param {any} name
+   * @returns
+   */
+  function modernizr(name) {
+    if (style[name] !== undefined) {
+      return {
+        name: name,
+        event: name + 'end'
+      }
+    }
+
+    var pfx;
+
+    name = name.replace(/(\w)/, function(word, letter) {
+      return letter.toUpperCase();
+    });
+
+    for (var i = 0, length = prefixes.length; i < length; i++) {
+      if (style[prefixes[i] + name] !== undefined) {
+        pfx = prefixes[i];
+
+        return {
+          property: pfx + name,
+          event: pfx + name + 'End'
+        };
+      }
+    }
+
+    return false;
+  }
+
   // animation
-  var animation = (function() {
-    if (style.animationName !== undefined) {
-      return {
-        property: 'animation',
-        event: 'animationend'
-      }
-    }
-
-    var pfx;
-
-    for (var i = 0, length = prefixes.length; i < length; i++) {
-      if (style[prefixes[i] + 'AnimationName'] !== undefined) {
-        pfx = prefixes[i];
-
-        return {
-          property: pfx + 'Animation',
-          event: pfx + 'AnimationEnd'
-        };
-      }
-    }
-
-    return false;
-  }());
-
+  var animation = modernizr('animation');
   // transition
-  var transition = (function() {
-    if (style.transitionProperty !== undefined) {
-      return {
-        property: 'transition',
-        event: 'transitionend'
-      }
-    }
-
-    var pfx;
-
-    for (var i = 0, length = prefixes.length; i < length; i++) {
-      if (style[prefixes[i] + 'TransitionProperty'] !== undefined) {
-        pfx = prefixes[i];
-
-        return {
-          property: pfx + 'Transition',
-          event: pfx + 'TransitionEnd'
-        };
-      }
-    }
-
-    return false;
-  }());
+  var transition = modernizr('transition');
 
   /**
-   * computedStyle
+   * getComputedStyle
    * @export
    * @param {any} element
    * @param {any} property
    * @returns
    */
-  function computedStyle(element, property) {
+  function getComputedStyle(element, property) {
     var getComputedStyle = window.getComputedStyle;
 
     var style =
@@ -164,17 +152,29 @@
       // Otherwise, we are in IE and use currentStyle
       element.currentStyle;
 
-    if (style) {
-      // Switch to camelCase for CSSOM
-      // DEV: Grabbed from jQuery
-      // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-      // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-      property = property.replace(/-(\w)/gi, function(word, letter) {
-        return letter.toUpperCase();
-      });
+    return {
+      /**
+       * getPropertyValue
+       * @param property
+       */
+      getPropertyValue: function(property) {
+        if (style) {
+          if (style.getPropertyValue) {
+            return style.getPropertyValue(property);
+          }
 
-      return style[property];
-    }
+          // Switch to camelCase for CSSOM
+          // DEV: Grabbed from jQuery
+          // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+          // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+          property = property.replace(/-(\w)/gi, function(word, letter) {
+            return letter.toUpperCase();
+          });
+
+          return style[property];
+        }
+      }
+    };
   }
 
   // 公用遮罩
@@ -386,36 +386,36 @@
       var node = context.node;
       var dialog = context.__node;
 
-      // 隐藏弹窗
+      // 切换弹窗样式
       dialog
         .removeClass(context.className + '-show')
         .addClass(context.className + '-close');
 
+      // 隐藏操作
       function next() {
         dialog
           .hide()
           .removeClass(context.className + '-close');
       }
 
-      console.log(!animation && !transition);
-
       if (animation || transition) {
         if (hasAnimation) {
           var events;
           var count = 0;
+          var style = getComputedStyle(node);
 
           // 是否有 animation 动画
           if (animation &&
-            computedStyle(node, animation.property + 'Name') !== 'none' &&
-            parseFloat(computedStyle(node, animation.property + 'Duration')) > 0) {
+            style.getPropertyValue(animation.name + '-name') !== 'none' &&
+            parseFloat(style.getPropertyValue(animation.name + '-duration')) > 0) {
             count++;
             events = animation.event;
           }
 
           // 是否有 transition 动画
           if (transition &&
-            computedStyle(node, transition.property + 'Property') !== 'none' &&
-            parseFloat(computedStyle(node, transition.property + 'Duration')) > 0) {
+            style.getPropertyValue(transition.name + '-property') !== 'none' &&
+            parseFloat(style.getPropertyValue(transition.name + '-duration')) > 0) {
             count++;
             events += (events ? ' ' : '') + transition.event;
           }

@@ -87,64 +87,52 @@ var style = document.documentElement.style;
 // 浏览器前缀
 var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
 
+/**
+ * modernizr
+ * @param {any} name
+ * @returns
+ */
+function modernizr(name) {
+  if (style[name] !== undefined) {
+    return {
+      name: name,
+      event: name + 'end'
+    }
+  }
+
+  var pfx;
+
+  name = name.replace(/(\w)/, function(word, letter) {
+    return letter.toUpperCase();
+  });
+
+  for (var i = 0, length = prefixes.length; i < length; i++) {
+    if (style[prefixes[i] + name] !== undefined) {
+      pfx = prefixes[i];
+
+      return {
+        property: pfx + name,
+        event: pfx + name + 'End'
+      };
+    }
+  }
+
+  return false;
+}
+
 // animation
-export var animation = (function() {
-  if (style.animationName !== undefined) {
-    return {
-      property: 'animation',
-      event: 'animationend'
-    }
-  }
-
-  var pfx;
-
-  for (var i = 0, length = prefixes.length; i < length; i++) {
-    if (style[prefixes[i] + 'AnimationName'] !== undefined) {
-      pfx = prefixes[i];
-
-      return {
-        property: pfx + 'Animation',
-        event: pfx + 'AnimationEnd'
-      };
-    }
-  }
-
-  return false;
-}());
-
+export var animation = modernizr('animation');
 // transition
-export var transition = (function() {
-  if (style.transitionProperty !== undefined) {
-    return {
-      property: 'transition',
-      event: 'transitionend'
-    }
-  }
-
-  var pfx;
-
-  for (var i = 0, length = prefixes.length; i < length; i++) {
-    if (style[prefixes[i] + 'TransitionProperty'] !== undefined) {
-      pfx = prefixes[i];
-
-      return {
-        property: pfx + 'Transition',
-        event: pfx + 'TransitionEnd'
-      };
-    }
-  }
-
-  return false;
-}());
+export var transition = modernizr('transition');
 
 /**
- * computedStyle
+ * getComputedStyle
  * @export
  * @param {any} element
  * @param {any} property
  * @returns
  */
-export function computedStyle(element, property) {
+export function getComputedStyle(element, property) {
   var getComputedStyle = window.getComputedStyle;
 
   var style =
@@ -156,15 +144,27 @@ export function computedStyle(element, property) {
     // Otherwise, we are in IE and use currentStyle
     element.currentStyle;
 
-  if (style) {
-    // Switch to camelCase for CSSOM
-    // DEV: Grabbed from jQuery
-    // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-    // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-    property = property.replace(/-(\w)/gi, function(word, letter) {
-      return letter.toUpperCase();
-    });
+  return {
+    /**
+     * getPropertyValue
+     * @param property
+     */
+    getPropertyValue: function(property) {
+      if (style) {
+        if (style.getPropertyValue) {
+          return style.getPropertyValue(property);
+        }
 
-    return style[property];
-  }
+        // Switch to camelCase for CSSOM
+        // DEV: Grabbed from jQuery
+        // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+        // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+        property = property.replace(/-(\w)/gi, function(word, letter) {
+          return letter.toUpperCase();
+        });
+
+        return style[property];
+      }
+    }
+  };
 }

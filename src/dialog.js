@@ -168,36 +168,36 @@ Dialog.prototype = {
     var node = context.node;
     var dialog = context.__node;
 
-    // 隐藏弹窗
+    // 切换弹窗样式
     dialog
       .removeClass(context.className + '-show')
       .addClass(context.className + '-close');
 
+    // 隐藏操作
     function next() {
       dialog
         .hide()
         .removeClass(context.className + '-close');
     }
 
-    console.log(!Utils.animation && !Utils.transition);
-
     if (Utils.animation || Utils.transition) {
       if (hasAnimation) {
         var events;
         var count = 0;
+        var style = Utils.getComputedStyle(node);
 
         // 是否有 animation 动画
         if (Utils.animation &&
-          Utils.computedStyle(node, Utils.animation.property + 'Name') !== 'none' &&
-          parseFloat(Utils.computedStyle(node, Utils.animation.property + 'Duration')) > 0) {
+          style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
+          parseFloat(style.getPropertyValue(Utils.animation.name + '-duration')) > 0) {
           count++;
           events = Utils.animation.event;
         }
 
         // 是否有 transition 动画
         if (Utils.transition &&
-          Utils.computedStyle(node, Utils.transition.property + 'Property') !== 'none' &&
-          parseFloat(Utils.computedStyle(node, Utils.transition.property + 'Duration')) > 0) {
+          style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
+          parseFloat(style.getPropertyValue(Utils.transition.name + '-duration')) > 0) {
           count++;
           events += (events ? ' ' : '') + Utils.transition.event;
         }
