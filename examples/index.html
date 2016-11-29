@@ -35,38 +35,53 @@
     <label><input id="follow" type="checkbox">跟随</label>
     <label><input id="modal" type="checkbox" checked="checked">模态</label>
     <script>
-      var dialog = new Dialog();
+      function create() {
+        var dialog = new Dialog();
 
-      dialog.innerHTML = '<div class="ui-dialog-content">hello, world</div>';
+        dialog.innerHTML = '<div class="ui-dialog-content">hello, world</div>';
 
-      dialog.addEventListener('focus', function() {
-        console.log('focus');
-      });
+        dialog.addEventListener('focus', function() {
+          console.log('focus');
+        });
 
-      dialog.addEventListener('blur', function() {
-        console.log('blur');
-      });
+        dialog.addEventListener('blur', function() {
+          console.log('blur');
+        });
 
-      dialog.addEventListener('show', function() {
-        console.log('show');
-      });
+        dialog.addEventListener('show', function() {
+          console.log('show');
+        });
 
-      dialog.addEventListener('close', function() {
-        console.log('close');
-      });
+        dialog.addEventListener('beforeclose', function() {
+          console.log('beforeclose');
+        });
 
-      dialog.addEventListener('beforeremove', function() {
-        console.log('beforeremove');
-      });
+        dialog.addEventListener('close', function() {
+          console.log('close');
+          dialog.remove();
+        });
 
-      dialog.addEventListener('remove', function() {
-        console.log('remove');
-      });
+        dialog.addEventListener('beforeremove', function() {
+          console.log('beforeremove');
+        });
+
+        dialog.addEventListener('remove', function() {
+          console.log('remove');
+        });
+
+        dialog.node.onclick = function() {
+          dialog.close();
+        };
+
+        return dialog;
+      }
 
       var follow = document.getElementById('follow');
       var modal = document.getElementById('modal');
 
       document.getElementById('button').onclick = function() {
+        var dialog = create();
+
         if (!follow.checked) {
           if (!modal.checked) {
             dialog.show();
@@ -80,10 +95,6 @@
             dialog.showModal(this);
           }
         }
-      };
-
-      dialog.node.onclick = function() {
-        dialog.close();
       };
     </script>
   </body>
