@@ -157,7 +157,7 @@ Dialog.prototype = {
 
     return context.show(anchor);
   },
-  __close: function(result, animation) {
+  __close: function(result, hasAnimation) {
     var context = this;
 
     // 设置返回值
@@ -182,7 +182,7 @@ Dialog.prototype = {
     console.log(!Utils.animation && !Utils.transition);
 
     if (Utils.animation || Utils.transition) {
-      if (animation) {
+      if (hasAnimation) {
         var events;
         var count = 0;
 

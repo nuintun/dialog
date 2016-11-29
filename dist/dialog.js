@@ -375,7 +375,7 @@
 
       return context.show(anchor);
     },
-    __close: function(result, animation$$1) {
+    __close: function(result, hasAnimation) {
       var context = this;
 
       // 设置返回值
@@ -400,7 +400,7 @@
       console.log(!animation && !transition);
 
       if (animation || transition) {
-        if (animation$$1) {
+        if (hasAnimation) {
           var events;
           var count = 0;
 
