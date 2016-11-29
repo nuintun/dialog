@@ -295,20 +295,15 @@
     // CSS 类名
     className: 'ui-dialog',
     /**
-     * 显示浮层
+     * 显示浮层（私有）
      * @param {HTMLElement, Event}  指定位置（可选）
      */
-    show: function(anchor) {
+    __show: function(anchor) {
       var context = this;
 
       // 已销毁
       if (context.destroyed) {
         return context;
-      }
-
-      // 已打开先关闭
-      if (context.open) {
-        context.__close();
       }
 
       var dialog = context.__node;
@@ -319,25 +314,21 @@
 
       // 初始化 show 方法
       if (!context.__ready) {
-        context.__ready = true;
-
         // 设置样式
         dialog
           .addClass(context.className)
-          .attr('role', context.modal ? 'alertdialog' : 'dialog')
           .css('position', context.fixed ? 'fixed' : 'absolute');
 
         // 弹窗添加到文档树
         dialog.appendTo(document.body);
 
-        // 模态浮层的遮罩
-        if (context.modal) {
-          dialog.addClass(context.className + '-modal');
-        }
+        // 切换ready状态
+        context.__ready = true;
       }
 
       // 设置内容
       if (context.__innerHTML !== context.innerHTML) {
+        // 设置内容
         dialog.html(context.innerHTML);
 
         // 换成内容
@@ -347,10 +338,12 @@
       // 显示遮罩
       if (context.modal) {
         Mask.show(context.node);
+        dialog.addClass(context.className + '-modal');
       }
 
       // 设置样式
       dialog
+        .attr('role', context.modal ? 'alertdialog' : 'dialog')
         .addClass(context.className + '-show')
         .show();
 
@@ -365,92 +358,38 @@
       return context;
     },
     /**
+     * 显示浮层
+     * @param {HTMLElement, Event}  指定位置（可选）
+     */
+    show: function(anchor) {
+      var context = this;
+
+      // 关闭模态
+      if (context.open && context.modal) {
+        var dialog = context.__node;
+
+        Mask.hide(context.node);
+        dialog.removeClass(context.className + '-modal');
+      }
+
+      // 重置模态状态
+      context.modal = false;
+
+      // 显示
+      return context.__show(anchor);
+    },
+    /**
      * 显示模态浮层。
-     * 参数参见 show()
+     * @param {HTMLElement, Event}  指定位置（可选）
      */
     showModal: function(anchor) {
       var context = this;
-
-      context.modal = true;
-
-      return context.show(anchor);
-    },
-    __close: function(result, hasAnimation) {
-      var context = this;
-
-      // 设置返回值
-      if (result !== undefined) {
-        context.returnValue = result;
-      }
-
-      var node = context.node;
       var dialog = context.__node;
 
-      // 切换弹窗样式
-      dialog
-        .removeClass(context.className + '-show')
-        .addClass(context.className + '-close');
+      // 重置模态状态
+      context.modal = true;
 
-      // 隐藏操作
-      function next() {
-        dialog
-          .hide()
-          .removeClass(context.className + '-close');
-      }
-
-      if (animation || transition) {
-        if (hasAnimation) {
-          var events;
-          var count = 0;
-          var style = getComputedStyle(node);
-
-          // 是否有 animation 动画
-          if (animation &&
-            style.getPropertyValue(animation.name + '-name') !== 'none' &&
-            parseFloat(style.getPropertyValue(animation.name + '-duration')) > 0) {
-            count++;
-            events = animation.event;
-          }
-
-          // 是否有 transition 动画
-          if (transition &&
-            style.getPropertyValue(transition.name + '-property') !== 'none' &&
-            parseFloat(style.getPropertyValue(transition.name + '-duration')) > 0) {
-            count++;
-            events += (events ? ' ' : '') + transition.event;
-          }
-
-          // 有动画做事件监听
-          if (count) {
-            var pending = function() {
-              if (!--count) {
-                next();
-
-                // 解除事件绑定
-                dialog.off(events, pending);
-              }
-            };
-
-            dialog.on(events, pending);
-          } else {
-            next();
-          }
-        } else {
-          next();
-        }
-      } else {
-        next();
-      }
-
-      // 隐藏遮罩
-      if (context.modal) {
-        Mask.hide(context.node);
-
-        // 重置模态状态
-        context.modal = false;
-      }
-
-      context.open = false;
+      return context.__show(anchor);
     },
     /**
      * 关闭浮层
@@ -459,12 +398,84 @@
     close: function(result) {
       var context = this;
 
+      // 未销毁且打开状态才做操作
       if (!context.destroyed && context.open) {
-        // 关闭
-        context.__close(result, true);
-        // 恢复焦点，照顾键盘操作的用户
-        context.blur();
-        context.__dispatchEvent('close');
+        // 关闭前
+        if (context.__dispatchEvent('beforeclose') !== false) {
+          // 关闭
+          // 设置返回值
+          if (result !== undefined) {
+            context.returnValue = result;
+          }
+
+          var node = context.node;
+          var dialog = context.__node;
+          // 隐藏操作
+          var next = function() {
+            dialog
+              .hide()
+              .removeClass(context.className + '-close');
+
+            // 切换打开状态
+            context.open = false;
+
+            // 恢复焦点，照顾键盘操作的用户
+            context.blur();
+            // 关闭事件
+            context.__dispatchEvent('close');
+          };
+
+          // 切换弹窗样式
+          dialog
+            .removeClass(context.className + '-show')
+            .addClass(context.className + '-close');
+
+          if (animation || transition) {
+            var events;
+            var count = 0;
+            var style = getComputedStyle(node);
+
+            // 是否有 animation 动画
+            if (animation &&
+              style.getPropertyValue(animation.name + '-name') !== 'none' &&
+              parseFloat(style.getPropertyValue(animation.name + '-duration')) > 0) {
+              count++;
+              events = animation.event;
+            }
+
+            // 是否有 transition 动画
+            if (transition &&
+              style.getPropertyValue(transition.name + '-property') !== 'none' &&
+              parseFloat(style.getPropertyValue(transition.name + '-duration')) > 0) {
+              count++;
+              events += (events ? ' ' : '') + transition.event;
+            }
+
+            // 有动画做事件监听
+            if (count) {
+              var pending = function() {
+                if (!--count) {
+                  next();
+
+                  // 解除事件绑定
+                  dialog.off(events, pending);
+                }
+              };
+
+              // 绑定动画结束事件
+              dialog.on(events, pending);
+            } else {
+              next();
+            }
+          } else {
+            next();
+          }
+
+          // 隐藏遮罩
+          if (context.modal) {
+            Mask.hide(context.node);
+          }
+        }
       }
 
       return context;
@@ -480,7 +491,7 @@
         return context;
       }
 
-      // 移除
+      // 移除前
       if (context.__dispatchEvent('beforeremove') === false) {
         return context;
       }

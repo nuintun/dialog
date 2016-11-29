@@ -51,16 +51,11 @@
 
       dialog.addEventListener('close', function() {
         console.log('close');
+        // dialog.remove();
       });
 
       dialog.addEventListener('beforeremove', function() {
         console.log('beforeremove');
-      });
-
-      dialog.addEventListener('animationend', function() {
-        console.log('animationend');
-
-        dialog.remove();
       });
 
       dialog.addEventListener('remove', function() {
