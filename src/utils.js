@@ -82,41 +82,89 @@ export var forEach = APForEach ? function(array, iterator, context) {
   }
 }
 
-// CSS3动画事件
-export var CSS3ANIMEVENTS = (function() {
-  var events;
-  var property;
-  var style = document.documentElement.style;
+// 默认样式
+var style = document.documentElement.style;
+// 浏览器前缀
+var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
 
-  var animations = {
-    'WebkitAnimation': 'webkitAnimationEnd',
-    'OAnimation': 'oAnimationEnd',
-    'msAnimation': 'MSAnimationEnd',
-    'animation': 'animationend'
-  };
-
-  var transitions = {
-    'WebkitTransition': 'webkitTransitionEnd',
-    'OTransition': 'oTransitionEnd',
-    'msTransition': 'MSTransitionEnd',
-    'transition': 'transitionend'
-  };
-
-  // animations
-  for (property in animations) {
-    if (style.hasOwnProperty(property)) {
-      events = animations[property];
-      break;
+// animation
+export var animation = (function() {
+  if (style.animationName !== undefined) {
+    return {
+      property: 'animation',
+      event: 'animationend'
     }
   }
 
-  // transitions
-  for (property in transitions) {
-    if (style.hasOwnProperty(property)) {
-      events += (events ? ' ' : '') + transitions[property];
-      break;
+  var pfx;
+
+  for (var i = 0, length = prefixes.length; i < length; i++) {
+    if (style[prefixes[i] + 'AnimationName'] !== undefined) {
+      pfx = prefixes[i];
+
+      return {
+        property: pfx + 'Animation',
+        event: pfx + 'AnimationEnd'
+      };
     }
   }
 
-  return events;
+  return false;
 }());
+
+// transition
+export var transition = (function() {
+  if (style.transitionProperty !== undefined) {
+    return {
+      property: 'transition',
+      event: 'transitionend'
+    }
+  }
+
+  var pfx;
+
+  for (var i = 0, length = prefixes.length; i < length; i++) {
+    if (style[prefixes[i] + 'TransitionProperty'] !== undefined) {
+      pfx = prefixes[i];
+
+      return {
+        property: pfx + 'Transition',
+        event: pfx + 'TransitionEnd'
+      };
+    }
+  }
+
+  return false;
+}());
+
+/**
+ * computedStyle
+ * @export
+ * @param {any} element
+ * @param {any} property
+ * @returns
+ */
+export function computedStyle(element, property) {
+  var getComputedStyle = window.getComputedStyle;
+
+  var style =
+    // If we have getComputedStyle
+    getComputedStyle ?
+    // Query it
+    // From CSS-Query notes, we might need (node, null) for FF
+    getComputedStyle(element, null) :
+    // Otherwise, we are in IE and use currentStyle
+    element.currentStyle;
+
+  if (style) {
+    // Switch to camelCase for CSSOM
+    // DEV: Grabbed from jQuery
+    // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+    // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+    property = property.replace(/-(\w)/gi, function(word, letter) {
+      return letter.toUpperCase();
+    });
+
+    return style[property];
+  }
+}

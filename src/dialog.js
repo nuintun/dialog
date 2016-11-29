@@ -165,28 +165,63 @@ Dialog.prototype = {
       context.returnValue = result;
     }
 
+    var node = context.node;
     var dialog = context.__node;
 
     // 隐藏弹窗
-    dialog.removeClass(context.className + '-show');
+    dialog
+      .removeClass(context.className + '-show')
+      .addClass(context.className + '-close');
 
-    // CSS3动画
-    if (animation && Utils.CSS3ANIMEVENTS) {
-      var next = function() {
-        // 动画结束事件
-        context.__dispatchEvent('animationend');
-
-        dialog
-          .hide()
-          .off(Utils.CSS3ANIMEVENTS, next)
-          .removeClass(context.className + '-close');
-      };
-
+    function next() {
       dialog
-        .on(Utils.CSS3ANIMEVENTS, next)
-        .addClass(context.className + '-close');
+        .hide()
+        .removeClass(context.className + '-close');
+    }
+
+    console.log(!Utils.animation && !Utils.transition);
+
+    if (Utils.animation || Utils.transition) {
+      if (animation) {
+        var events;
+        var count = 0;
+
+        // 是否有 animation 动画
+        if (Utils.animation &&
+          Utils.computedStyle(node, Utils.animation.property + 'Name') !== 'none' &&
+          parseFloat(Utils.computedStyle(node, Utils.animation.property + 'Duration')) > 0) {
+          count++;
+          events = Utils.animation.event;
+        }
+
+        // 是否有 transition 动画
+        if (Utils.transition &&
+          Utils.computedStyle(node, Utils.transition.property + 'Property') !== 'none' &&
+          parseFloat(Utils.computedStyle(node, Utils.transition.property + 'Duration')) > 0) {
+          count++;
+          events += (events ? ' ' : '') + Utils.transition.event;
+        }
+
+        // 有动画做事件监听
+        if (count) {
+          var pending = function() {
+            if (!--count) {
+              next();
+
+              // 解除事件绑定
+              dialog.off(events, pending);
+            }
+          };
+
+          dialog.on(events, pending);
+        } else {
+          next();
+        }
+      } else {
+        next();
+      }
     } else {
-      dialog.hide();
+      next();
     }
 
     // 隐藏遮罩
