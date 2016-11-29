@@ -33,6 +33,7 @@
   <body>
     <button id="button" style="margin: 100px 0 0 200px;">button</button>
     <label><input id="follow" type="checkbox">跟随</label>
+    <label><input id="modal" type="checkbox" checked="checked">模态</label>
     <script>
       var dialog = new Dialog();
 
@@ -52,7 +53,6 @@
 
       dialog.addEventListener('close', function() {
         console.log('close');
-        // dialog.remove();
       });
 
       dialog.addEventListener('beforeremove', function() {
@@ -64,17 +64,26 @@
       });
 
       var follow = document.getElementById('follow');
+      var modal = document.getElementById('modal');
 
       document.getElementById('button').onclick = function() {
         if (!follow.checked) {
-          dialog.showModal();
+          if (!modal.checked) {
+            dialog.show();
+          } else {
+            dialog.showModal();
+          }
         } else {
-          dialog.showModal(this);
+          if (!modal.checked) {
+            dialog.show(this);
+          } else {
+            dialog.showModal(this);
+          }
         }
+      };
 
-        setTimeout(function() {
-          dialog.close();
-        }, 3000);
+      dialog.node.onclick = function() {
+        dialog.close();
       };
     </script>
   </body>
