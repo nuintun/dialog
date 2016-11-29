@@ -248,8 +248,12 @@
   // 原型属性
   Dialog.prototype = {
     /**
-     * 初始化完毕事件，在 show()、showModal() 执行
+     * 显示事件，在 show()、showModal() 执行
      * @name Popup.prototype.onshow
+     * @event
+     *
+     * 关闭前事件，在 close() 前执行
+     * @name Popup.prototype.onbeforeclose
      * @event
      *
      * 关闭事件，在 close() 执行
@@ -309,8 +313,8 @@
       var dialog = context.__node;
 
       context.open = true;
-      context.follow = anchor || context.follow;
       context.__activeElement = context.__getActive();
+      context.follow = arguments.length ? anchor : context.follow;
 
       // 初始化 show 方法
       if (!context.__ready) {

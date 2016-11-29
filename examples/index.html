@@ -21,17 +21,18 @@
         background-color: #fff;
         -webkit-background-clip: content;
         background-clip: content;
-        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         pointer-events: auto;
         border-radius: 2px;
         border: 1px solid #B2B2B2;
-        border: 1px solid rgba(0,0,0,.1);
-        box-shadow: 1px 1px 5px rgba(0,0,0,.2);
+        border: 1px solid rgba(0, 0, 0, .1);
+        box-shadow: 1px 1px 5px rgba(0, 0, 0, .2);
       }
     </style>
   </head>
   <body>
     <button id="button" style="margin: 100px 0 0 200px;">button</button>
+    <label><input id="follow" type="checkbox">跟随</label>
     <script>
       var dialog = new Dialog();
 
@@ -62,12 +63,19 @@
         console.log('remove');
       });
 
-      dialog.showModal(document.getElementById('button'));
+      var follow = document.getElementById('follow');
 
-      setTimeout(function() {
-        dialog.close();
-      }, 3000);
+      document.getElementById('button').onclick = function() {
+        if (!follow.checked) {
+          dialog.showModal();
+        } else {
+          dialog.showModal(this);
+        }
 
+        setTimeout(function() {
+          dialog.close();
+        }, 3000);
+      };
     </script>
   </body>
 </html>
