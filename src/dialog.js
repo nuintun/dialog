@@ -153,10 +153,15 @@ Dialog.prototype = {
     var context = this;
 
     // 关闭模态
-    if (context.open && context.modal) {
+    if (context.modal) {
       var dialog = context.__node;
 
-      Mask.hide(context.node);
+      // 关闭遮罩
+      if (context.open) {
+        Mask.hide(context.node);
+      }
+
+      // 移除类名
       dialog.removeClass(context.className + '-modal');
     }
 
