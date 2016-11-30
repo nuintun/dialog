@@ -787,7 +787,8 @@
     },
     // 获取当前焦点的元素
     __getActive: function() {
-      try { // try: ie8~9, iframe #26
+      try {
+        // try: ie8~9, iframe #26
         var activeElement = document.activeElement;
         var contentDocument = activeElement.contentDocument;
         var element = contentDocument && contentDocument.activeElement || activeElement;
