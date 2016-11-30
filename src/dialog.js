@@ -240,7 +240,7 @@ Dialog.prototype = {
         // 是否有 animation 动画
         if (Utils.animation &&
           style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
-          parseFloat(style.getPropertyValue(Utils.animation.name + '-duration')) > 0) {
+          Utils.hasDuration(style.getPropertyValue(Utils.animation.name + '-duration'))) {
           count++;
           events = Utils.animation.event;
         }
@@ -248,7 +248,7 @@ Dialog.prototype = {
         // 是否有 transition 动画
         if (Utils.transition &&
           style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
-          parseFloat(style.getPropertyValue(Utils.transition.name + '-duration')) > 0) {
+          Utils.hasDuration(style.getPropertyValue(Utils.transition.name + '-duration'))) {
           count++;
           events += (events ? ' ' : '') + Utils.transition.event;
         }

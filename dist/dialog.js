@@ -183,6 +183,23 @@
     };
   }
 
+  /**
+   * hasDuration
+   * @export
+   * @param {any} duration
+   */
+  function hasDuration(duration) {
+    duration = duration.split(/\s*,\s*/);
+
+    for (var i = 0, length = duration.length; i < length; i++) {
+      if (parseFloat(duration[i]) > 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   // 公用遮罩
   var Mask = {
     // 遮罩分配
@@ -464,7 +481,7 @@
           // 是否有 animation 动画
           if (animation &&
             style.getPropertyValue(animation.name + '-name') !== 'none' &&
-            parseFloat(style.getPropertyValue(animation.name + '-duration')) > 0) {
+            hasDuration(style.getPropertyValue(animation.name + '-duration'))) {
             count++;
             events = animation.event;
           }
@@ -472,7 +489,7 @@
           // 是否有 transition 动画
           if (transition &&
             style.getPropertyValue(transition.name + '-property') !== 'none' &&
-            parseFloat(style.getPropertyValue(transition.name + '-duration')) > 0) {
+            hasDuration(style.getPropertyValue(transition.name + '-duration'))) {
             count++;
             events += (events ? ' ' : '') + transition.event;
           }

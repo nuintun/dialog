@@ -174,3 +174,20 @@ export function getComputedStyle(element, property) {
     }
   };
 }
+
+/**
+ * hasDuration
+ * @export
+ * @param {any} duration
+ */
+export function hasDuration(duration) {
+  duration = duration.split(/\s*,\s*/);
+
+  for (var i = 0, length = duration.length; i < length; i++) {
+    if (parseFloat(duration[i]) > 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
