@@ -82,6 +82,8 @@ Dialog.prototype = {
   innerHTML: '',
   // CSS 类名
   className: 'ui-dialog',
+  // 构造函数
+  constructor: Dialog,
   /**
    * 显示浮层（私有）
    * @param {HTMLElement, Event}  指定位置（可选）
@@ -220,11 +222,12 @@ Dialog.prototype = {
         Mask.hide(context.node);
       }
 
+      // 恢复焦点，照顾键盘操作的用户
+      context.blur();
+
       // 切换打开状态
       context.open = false;
 
-      // 恢复焦点，照顾键盘操作的用户
-      context.blur();
       // 关闭事件
       context.__dispatchEvent('close');
     }
@@ -301,6 +304,11 @@ Dialog.prototype = {
 
     // 从 DOM 中移除节点
     context.__node.remove();
+
+    // 切换销毁状态
+    context.destroyed = true;
+
+    // 触发销毁事件
     context.__dispatchEvent('remove');
 
     // 清理属性
