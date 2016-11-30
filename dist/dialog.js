@@ -159,17 +159,23 @@
        */
       getPropertyValue: function(property) {
         if (style) {
+          // Original support
           if (style.getPropertyValue) {
             return style.getPropertyValue(property);
           }
 
-          // Switch to camelCase for CSSOM
-          // DEV: Grabbed from jQuery
-          // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-          // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-          property = property.replace(/-(\w)/gi, function(word, letter) {
-            return letter.toUpperCase();
-          });
+          // Fixed IE float
+          if (prop === 'float') {
+            prop = 'styleFloat';
+          } else {
+            // Switch to camelCase for CSSOM
+            // DEV: Grabbed from jQuery
+            // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+            // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+            property = property.replace(/-(\w)/gi, function(word, letter) {
+              return letter.toUpperCase();
+            });
+          }
 
           return style[property];
         }
