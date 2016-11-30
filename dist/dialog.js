@@ -426,6 +426,12 @@
         var dialog = context.__node;
         // 隐藏操作
         var next = function() {
+          // 隐藏遮罩
+          if (context.modal) {
+            Mask.hide(context.node);
+          }
+
+          // 隐藏弹窗
           dialog
             .hide()
             .removeClass(context.className + '-close');
@@ -483,11 +489,6 @@
           }
         } else {
           next();
-        }
-
-        // 隐藏遮罩
-        if (context.modal) {
-          Mask.hide(context.node);
         }
       }
 
