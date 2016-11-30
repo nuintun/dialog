@@ -194,80 +194,82 @@ Dialog.prototype = {
     // 未销毁且打开状态才做操作
     if (!context.destroyed && context.open) {
       // 关闭前
-      if (context.__dispatchEvent('beforeclose') !== false) {
-        // 关闭
-        // 设置返回值
-        if (result !== undefined) {
-          context.returnValue = result;
-        }
+      if (context.__dispatchEvent('beforeclose') === false) {
+        return context;
+      }
 
-        var node = context.node;
-        var dialog = context.__node;
-        // 隐藏操作
-        var next = function() {
-          dialog
-            .hide()
-            .removeClass(context.className + '-close');
+      // 关闭
+      // 设置返回值
+      if (result !== undefined) {
+        context.returnValue = result;
+      }
 
-          // 切换打开状态
-          context.open = false;
-
-          // 恢复焦点，照顾键盘操作的用户
-          context.blur();
-          // 关闭事件
-          context.__dispatchEvent('close');
-        }
-
-        // 切换弹窗样式
+      var node = context.node;
+      var dialog = context.__node;
+      // 隐藏操作
+      var next = function() {
         dialog
-          .removeClass(context.className + '-show')
-          .addClass(context.className + '-close');
+          .hide()
+          .removeClass(context.className + '-close');
 
-        if (Utils.animation || Utils.transition) {
-          var events;
-          var count = 0;
-          var style = Utils.getComputedStyle(node);
+        // 切换打开状态
+        context.open = false;
 
-          // 是否有 animation 动画
-          if (Utils.animation &&
-            style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
-            parseFloat(style.getPropertyValue(Utils.animation.name + '-duration')) > 0) {
-            count++;
-            events = Utils.animation.event;
-          }
+        // 恢复焦点，照顾键盘操作的用户
+        context.blur();
+        // 关闭事件
+        context.__dispatchEvent('close');
+      }
 
-          // 是否有 transition 动画
-          if (Utils.transition &&
-            style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
-            parseFloat(style.getPropertyValue(Utils.transition.name + '-duration')) > 0) {
-            count++;
-            events += (events ? ' ' : '') + Utils.transition.event;
-          }
+      // 切换弹窗样式
+      dialog
+        .removeClass(context.className + '-show')
+        .addClass(context.className + '-close');
 
-          // 有动画做事件监听
-          if (count) {
-            var pending = function() {
-              if (!--count) {
-                next();
+      if (Utils.animation || Utils.transition) {
+        var events;
+        var count = 0;
+        var style = Utils.getComputedStyle(node);
 
-                // 解除事件绑定
-                dialog.off(events, pending);
-              }
-            };
+        // 是否有 animation 动画
+        if (Utils.animation &&
+          style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
+          parseFloat(style.getPropertyValue(Utils.animation.name + '-duration')) > 0) {
+          count++;
+          events = Utils.animation.event;
+        }
 
-            // 绑定动画结束事件
-            dialog.on(events, pending);
-          } else {
-            next();
-          }
+        // 是否有 transition 动画
+        if (Utils.transition &&
+          style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
+          parseFloat(style.getPropertyValue(Utils.transition.name + '-duration')) > 0) {
+          count++;
+          events += (events ? ' ' : '') + Utils.transition.event;
+        }
+
+        // 有动画做事件监听
+        if (count) {
+          var pending = function() {
+            if (!--count) {
+              next();
+
+              // 解除事件绑定
+              dialog.off(events, pending);
+            }
+          };
+
+          // 绑定动画结束事件
+          dialog.on(events, pending);
         } else {
           next();
         }
+      } else {
+        next();
+      }
 
-        // 隐藏遮罩
-        if (context.modal) {
-          Mask.hide(context.node);
-        }
+      // 隐藏遮罩
+      if (context.modal) {
+        Mask.hide(context.node);
       }
     }
 
