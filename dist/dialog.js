@@ -433,85 +433,87 @@
     close: function(result) {
       var context = this;
 
-      // 未销毁且打开状态才做操作
-      if (!context.destroyed && context.open) {
-        // 关闭前
-        if (context.__dispatchEvent('beforeclose') === false) {
-          return context;
+      // 销毁和未打开不做处理
+      if (context.destroyed || !context.open) {
+        return context;
+      }
+
+      // 关闭前
+      if (context.__dispatchEvent('beforeclose') === false) {
+        return context;
+      }
+
+      // 关闭
+      // 设置返回值
+      if (result !== undefined) {
+        context.returnValue = result;
+      }
+
+      var node = context.node;
+      var dialog = context.__node;
+      // 隐藏操作
+      var next = function() {
+        // 隐藏弹窗
+        dialog.hide();
+
+        // 隐藏遮罩
+        if (context.modal) {
+          Mask.hide(context.node);
         }
 
-        // 关闭
-        // 设置返回值
-        if (result !== undefined) {
-          context.returnValue = result;
+        // 切换打开状态
+        context.open = false;
+
+        // 恢复焦点，照顾键盘操作的用户
+        context.blur();
+        // 关闭事件
+        context.__dispatchEvent('close');
+      };
+
+      // 切换弹窗样式
+      dialog
+        .removeClass(context.className + '-show')
+        .addClass(context.className + '-close');
+
+      if (animation || transition) {
+        var events;
+        var count = 0;
+        var style = getComputedStyle(node);
+
+        // 是否有 animation 动画
+        if (animation &&
+          style.getPropertyValue(animation.name + '-name') !== 'none' &&
+          hasDuration(style.getPropertyValue(animation.name + '-duration'))) {
+          count++;
+          events = animation.event;
         }
 
-        var node = context.node;
-        var dialog = context.__node;
-        // 隐藏操作
-        var next = function() {
-          // 隐藏弹窗
-          dialog.hide();
+        // 是否有 transition 动画
+        if (transition &&
+          style.getPropertyValue(transition.name + '-property') !== 'none' &&
+          hasDuration(style.getPropertyValue(transition.name + '-duration'))) {
+          count++;
+          events += (events ? ' ' : '') + transition.event;
+        }
 
-          // 隐藏遮罩
-          if (context.modal) {
-            Mask.hide(context.node);
-          }
+        // 有动画做事件监听
+        if (count) {
+          var pending = function() {
+            if (!--count) {
+              next();
 
-          // 切换打开状态
-          context.open = false;
+              // 解除事件绑定
+              dialog.off(events, pending);
+            }
+          };
 
-          // 恢复焦点，照顾键盘操作的用户
-          context.blur();
-          // 关闭事件
-          context.__dispatchEvent('close');
-        };
-
-        // 切换弹窗样式
-        dialog
-          .removeClass(context.className + '-show')
-          .addClass(context.className + '-close');
-
-        if (animation || transition) {
-          var events;
-          var count = 0;
-          var style = getComputedStyle(node);
-
-          // 是否有 animation 动画
-          if (animation &&
-            style.getPropertyValue(animation.name + '-name') !== 'none' &&
-            hasDuration(style.getPropertyValue(animation.name + '-duration'))) {
-            count++;
-            events = animation.event;
-          }
-
-          // 是否有 transition 动画
-          if (transition &&
-            style.getPropertyValue(transition.name + '-property') !== 'none' &&
-            hasDuration(style.getPropertyValue(transition.name + '-duration'))) {
-            count++;
-            events += (events ? ' ' : '') + transition.event;
-          }
-
-          // 有动画做事件监听
-          if (count) {
-            var pending = function() {
-              if (!--count) {
-                next();
-
-                // 解除事件绑定
-                dialog.off(events, pending);
-              }
-            };
-
-            // 绑定动画结束事件
-            dialog.on(events, pending);
-          } else {
-            next();
-          }
+          // 绑定动画结束事件
+          dialog.on(events, pending);
         } else {
           next();
         }
+      } else {
+        next();
       }
 
       return context;
@@ -558,6 +560,12 @@
      */
     reset: function() {
       var context = this;
+
+      // 销毁和未打开不做处理
+      if (context.destroyed || !context.open) {
+        return context;
+      }
+
       var follow = context.follow;
 
       if (follow) {
@@ -576,12 +584,18 @@
      */
     focus: function() {
       var context = this;
+
+      // 销毁和未打开不做处理
+      if (context.destroyed || !context.open) {
+        return context;
+      }
+
       var node = context.node;
       var current = Dialog.current;
       var dialog = context.__node;
       var index = context.zIndex = Dialog.zIndex++;
 
-      if (current && current !== this) {
+      if (current && current !== context) {
         current.blur(false);
       }
 
@@ -595,6 +609,7 @@
           autofocus = node;
         }
 
+        // 获取焦点
         context.__focus(autofocus);
       }
 
@@ -618,6 +633,12 @@
      */
     blur: function() {
       var context = this;
+
+      // 销毁和未打开不做处理
+      if (context.destroyed || !context.open) {
+        return context;
+      }
+
       var isBlur = arguments[0];
       var activeElement = context.__activeElement;
 

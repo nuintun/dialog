@@ -192,85 +192,87 @@ Dialog.prototype = {
   close: function(result) {
     var context = this;
 
-    // 未销毁且打开状态才做操作
-    if (!context.destroyed && context.open) {
-      // 关闭前
-      if (context.__dispatchEvent('beforeclose') === false) {
-        return context;
+    // 销毁和未打开不做处理
+    if (context.destroyed || !context.open) {
+      return context;
+    }
+
+    // 关闭前
+    if (context.__dispatchEvent('beforeclose') === false) {
+      return context;
+    }
+
+    // 关闭
+    // 设置返回值
+    if (result !== undefined) {
+      context.returnValue = result;
+    }
+
+    var node = context.node;
+    var dialog = context.__node;
+    // 隐藏操作
+    var next = function() {
+      // 隐藏弹窗
+      dialog.hide();
+
+      // 隐藏遮罩
+      if (context.modal) {
+        Mask.hide(context.node);
       }
 
-      // 关闭
-      // 设置返回值
-      if (result !== undefined) {
-        context.returnValue = result;
+      // 切换打开状态
+      context.open = false;
+
+      // 恢复焦点，照顾键盘操作的用户
+      context.blur();
+      // 关闭事件
+      context.__dispatchEvent('close');
+    }
+
+    // 切换弹窗样式
+    dialog
+      .removeClass(context.className + '-show')
+      .addClass(context.className + '-close');
+
+    if (Utils.animation || Utils.transition) {
+      var events;
+      var count = 0;
+      var style = Utils.getComputedStyle(node);
+
+      // 是否有 animation 动画
+      if (Utils.animation &&
+        style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
+        Utils.hasDuration(style.getPropertyValue(Utils.animation.name + '-duration'))) {
+        count++;
+        events = Utils.animation.event;
       }
 
-      var node = context.node;
-      var dialog = context.__node;
-      // 隐藏操作
-      var next = function() {
-        // 隐藏弹窗
-        dialog.hide();
-
-        // 隐藏遮罩
-        if (context.modal) {
-          Mask.hide(context.node);
-        }
-
-        // 切换打开状态
-        context.open = false;
-
-        // 恢复焦点，照顾键盘操作的用户
-        context.blur();
-        // 关闭事件
-        context.__dispatchEvent('close');
+      // 是否有 transition 动画
+      if (Utils.transition &&
+        style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
+        Utils.hasDuration(style.getPropertyValue(Utils.transition.name + '-duration'))) {
+        count++;
+        events += (events ? ' ' : '') + Utils.transition.event;
       }
 
-      // 切换弹窗样式
-      dialog
-        .removeClass(context.className + '-show')
-        .addClass(context.className + '-close');
+      // 有动画做事件监听
+      if (count) {
+        var pending = function() {
+          if (!--count) {
+            next();
 
-      if (Utils.animation || Utils.transition) {
-        var events;
-        var count = 0;
-        var style = Utils.getComputedStyle(node);
+            // 解除事件绑定
+            dialog.off(events, pending);
+          }
+        };
 
-        // 是否有 animation 动画
-        if (Utils.animation &&
-          style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
-          Utils.hasDuration(style.getPropertyValue(Utils.animation.name + '-duration'))) {
-          count++;
-          events = Utils.animation.event;
-        }
-
-        // 是否有 transition 动画
-        if (Utils.transition &&
-          style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
-          Utils.hasDuration(style.getPropertyValue(Utils.transition.name + '-duration'))) {
-          count++;
-          events += (events ? ' ' : '') + Utils.transition.event;
-        }
-
-        // 有动画做事件监听
-        if (count) {
-          var pending = function() {
-            if (!--count) {
-              next();
-
-              // 解除事件绑定
-              dialog.off(events, pending);
-            }
-          };
-
-          // 绑定动画结束事件
-          dialog.on(events, pending);
-        } else {
-          next();
-        }
+        // 绑定动画结束事件
+        dialog.on(events, pending);
       } else {
         next();
       }
+    } else {
+      next();
     }
 
     return context;
@@ -317,6 +319,12 @@ Dialog.prototype = {
    */
   reset: function() {
     var context = this;
+
+    // 销毁和未打开不做处理
+    if (context.destroyed || !context.open) {
+      return context;
+    }
+
     var follow = context.follow;
 
     if (follow) {
@@ -335,12 +343,18 @@ Dialog.prototype = {
    */
   focus: function() {
     var context = this;
+
+    // 销毁和未打开不做处理
+    if (context.destroyed || !context.open) {
+      return context;
+    }
+
     var node = context.node;
     var current = Dialog.current;
     var dialog = context.__node;
     var index = context.zIndex = Dialog.zIndex++;
 
-    if (current && current !== this) {
+    if (current && current !== context) {
       current.blur(false);
     }
 
@@ -354,6 +368,7 @@ Dialog.prototype = {
         autofocus = node;
       }
 
+      // 获取焦点
       context.__focus(autofocus);
     }
 
@@ -377,6 +392,12 @@ Dialog.prototype = {
    */
   blur: function() {
     var context = this;
+
+    // 销毁和未打开不做处理
+    if (context.destroyed || !context.open) {
+      return context;
+    }
+
     var isBlur = arguments[0];
     var activeElement = context.__activeElement;
 
