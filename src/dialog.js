@@ -132,6 +132,7 @@ Dialog.prototype = {
     // 设置样式
     dialog
       .attr('role', context.modal ? 'alertdialog' : 'dialog')
+      .removeClass(context.className + '-close')
       .addClass(context.className + '-show')
       .show();
 
@@ -208,15 +209,13 @@ Dialog.prototype = {
       var dialog = context.__node;
       // 隐藏操作
       var next = function() {
+        // 隐藏弹窗
+        dialog.hide();
+
         // 隐藏遮罩
         if (context.modal) {
           Mask.hide(context.node);
         }
-
-        // 隐藏弹窗
-        dialog
-          .hide()
-          .removeClass(context.className + '-close');
 
         // 切换打开状态
         context.open = false;
