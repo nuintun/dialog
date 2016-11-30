@@ -90,49 +90,6 @@
     }
   };
 
-  // 默认样式
-  var style = document.documentElement.style;
-  // 浏览器前缀
-  var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
-
-  /**
-   * modernizr
-   * @param {any} name
-   * @returns
-   */
-  function modernizr(name) {
-    if (style[name] !== undefined) {
-      return {
-        name: name,
-        event: name + 'end'
-      }
-    }
-
-    var pfx;
-
-    name = name.replace(/(\w)/, function(word, letter) {
-      return letter.toUpperCase();
-    });
-
-    for (var i = 0, length = prefixes.length; i < length; i++) {
-      if (style[prefixes[i] + name] !== undefined) {
-        pfx = prefixes[i];
-
-        return {
-          property: pfx + name,
-          event: pfx + name + 'End'
-        };
-      }
-    }
-
-    return false;
-  }
-
-  // animation
-  var animation = modernizr('animation');
-  // transition
-  var transition = modernizr('transition');
-
   /**
    * getComputedStyle
    * @export
@@ -152,6 +109,7 @@
       // Otherwise, we are in IE and use currentStyle
       element.currentStyle;
 
+    // 返回 getPropertyValue 方法
     return {
       /**
        * getPropertyValue
@@ -183,6 +141,65 @@
     };
   }
 
+  // 默认样式
+  var style = document.documentElement.style;
+  // 浏览器前缀
+  var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
+
+  /**
+   * modernizr
+   * @param {any} name
+   * @returns
+   */
+  function modernizr(name) {
+    if (style[name] !== undefined) {
+      return name;
+    }
+
+    // 单词首字母大写
+    name = name.replace(/\w/, function(letter) {
+      return letter.toUpperCase();
+    });
+
+    // 检测
+    for (var pfx, i = 0, length = prefixes.length; i < length; i++) {
+      if (style[prefixes[i] + name] !== undefined) {
+        pfx = prefixes[i];
+
+        return pfx + name;
+      }
+    }
+
+    // 不支持
+    return false;
+  }
+
+  // animation
+  var animation = modernizr('animation');
+
+  // transition
+  var transition = modernizr('transition');
+
+  // animationend 映射表
+  var ANIMATIONEND_EVENTS = {
+    animation: 'animationend',
+    WebkitAnimation: 'webkitAnimationEnd',
+    MozAnimation: 'mozAnimationEnd',
+    OAnimation: 'oAnimationEnd',
+    msAnimation: 'MSAnimationEnd',
+    KhtmlAnimation: 'khtmlAnimationEnd'
+  };
+
+  // transition 映射表
+  var TRANSITIONEND_EVENTS = {
+    transition: 'transitionend',
+    WebkitTransition: 'webkitTransitionEnd',
+    MozTransition: 'mozTransitionEnd',
+    OTransition: 'oTransitionEnd',
+    msTransition: 'MSTransitionEnd',
+    KhtmlTransition: 'khtmlTransitionEnd'
+  };
+
   /**
    * hasDuration
    * @export
@@ -198,6 +215,32 @@
     }
 
     return false;
+  }
+
+  /**
+   * hasAnimation
+   * @param {any} style
+   * @returns
+   */
+  function hasAnimation(style) {
+    return animation &&
+      // animation-name
+      style.getPropertyValue(animation + '-name') !== 'none' &&
+      // animation-duration
+      hasDuration(style.getPropertyValue(animation + '-duration'));
+  }
+
+  /**
+   * hasTransition
+   * @param {any} style
+   * @returns
+   */
+  function hasTransition(style) {
+    return transition &&
+      // transition-property
+      style.getPropertyValue(transition + '-property') !== 'none' &&
+      // transition-duration
+      Utils.hasDuration(style.getPropertyValue(transition + '-duration'));
   }
 
   // 公用遮罩
@@ -481,19 +524,15 @@
         var style = getComputedStyle(node);
 
         // 是否有 animation 动画
-        if (animation &&
-          style.getPropertyValue(animation.name + '-name') !== 'none' &&
-          hasDuration(style.getPropertyValue(animation.name + '-duration'))) {
+        if (hasAnimation(style)) {
           count++;
-          events = animation.event;
+          events = ANIMATIONEND_EVENTS[animation];
         }
 
         // 是否有 transition 动画
-        if (transition &&
-          style.getPropertyValue(transition.name + '-property') !== 'none' &&
-          hasDuration(style.getPropertyValue(transition.name + '-duration'))) {
+        if (hasTransition(style)) {
           count++;
-          events += (events ? ' ' : '') + transition.event;
+          events += (events ? ' ' : '') + TRANSITIONEND_EVENTS[transition];
         }
 
         // 有动画做事件监听

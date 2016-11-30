@@ -82,49 +82,6 @@ export var forEach = APForEach ? function(array, iterator, context) {
   }
 }
 
-// 默认样式
-var style = document.documentElement.style;
-// 浏览器前缀
-var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
-
-/**
- * modernizr
- * @param {any} name
- * @returns
- */
-function modernizr(name) {
-  if (style[name] !== undefined) {
-    return {
-      name: name,
-      event: name + 'end'
-    }
-  }
-
-  var pfx;
-
-  name = name.replace(/(\w)/, function(word, letter) {
-    return letter.toUpperCase();
-  });
-
-  for (var i = 0, length = prefixes.length; i < length; i++) {
-    if (style[prefixes[i] + name] !== undefined) {
-      pfx = prefixes[i];
-
-      return {
-        property: pfx + name,
-        event: pfx + name + 'End'
-      };
-    }
-  }
-
-  return false;
-}
-
-// animation
-export var animation = modernizr('animation');
-// transition
-export var transition = modernizr('transition');
-
 /**
  * getComputedStyle
  * @export
@@ -144,6 +101,7 @@ export function getComputedStyle(element, property) {
     // Otherwise, we are in IE and use currentStyle
     element.currentStyle;
 
+  // 返回 getPropertyValue 方法
   return {
     /**
      * getPropertyValue
@@ -175,12 +133,71 @@ export function getComputedStyle(element, property) {
   };
 }
 
+// 默认样式
+var style = document.documentElement.style;
+// 浏览器前缀
+var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
+
+/**
+ * modernizr
+ * @param {any} name
+ * @returns
+ */
+function modernizr(name) {
+  if (style[name] !== undefined) {
+    return name;
+  }
+
+  // 单词首字母大写
+  name = name.replace(/\w/, function(letter) {
+    return letter.toUpperCase();
+  });
+
+  // 检测
+  for (var pfx, i = 0, length = prefixes.length; i < length; i++) {
+    if (style[prefixes[i] + name] !== undefined) {
+      pfx = prefixes[i];
+
+      return pfx + name;
+    }
+  }
+
+  // 不支持
+  return false;
+}
+
+// animation
+export var animation = modernizr('animation');
+
+// transition
+export var transition = modernizr('transition');
+
+// animationend 映射表
+export var ANIMATIONEND_EVENTS = {
+  animation: 'animationend',
+  WebkitAnimation: 'webkitAnimationEnd',
+  MozAnimation: 'mozAnimationEnd',
+  OAnimation: 'oAnimationEnd',
+  msAnimation: 'MSAnimationEnd',
+  KhtmlAnimation: 'khtmlAnimationEnd'
+};
+
+// transition 映射表
+export var TRANSITIONEND_EVENTS = {
+  transition: 'transitionend',
+  WebkitTransition: 'webkitTransitionEnd',
+  MozTransition: 'mozTransitionEnd',
+  OTransition: 'oTransitionEnd',
+  msTransition: 'MSTransitionEnd',
+  KhtmlTransition: 'khtmlTransitionEnd'
+};
+
 /**
  * hasDuration
  * @export
  * @param {any} duration
  */
-export function hasDuration(duration) {
+function hasDuration(duration) {
   duration = duration.split(/\s*,\s*/);
 
   for (var i = 0, length = duration.length; i < length; i++) {
@@ -190,4 +207,30 @@ export function hasDuration(duration) {
   }
 
   return false;
+}
+
+/**
+ * hasAnimation
+ * @param {any} style
+ * @returns
+ */
+export function hasAnimation(style) {
+  return animation &&
+    // animation-name
+    style.getPropertyValue(animation + '-name') !== 'none' &&
+    // animation-duration
+    hasDuration(style.getPropertyValue(animation + '-duration'));
+}
+
+/**
+ * hasTransition
+ * @param {any} style
+ * @returns
+ */
+export function hasTransition(style) {
+  return transition &&
+    // transition-property
+    style.getPropertyValue(transition + '-property') !== 'none' &&
+    // transition-duration
+    Utils.hasDuration(style.getPropertyValue(transition + '-duration'));
 }

@@ -240,19 +240,15 @@ Dialog.prototype = {
       var style = Utils.getComputedStyle(node);
 
       // 是否有 animation 动画
-      if (Utils.animation &&
-        style.getPropertyValue(Utils.animation.name + '-name') !== 'none' &&
-        Utils.hasDuration(style.getPropertyValue(Utils.animation.name + '-duration'))) {
+      if (Utils.hasAnimation(style)) {
         count++;
-        events = Utils.animation.event;
+        events = Utils.ANIMATIONEND_EVENTS[Utils.animation];
       }
 
       // 是否有 transition 动画
-      if (Utils.transition &&
-        style.getPropertyValue(Utils.transition.name + '-property') !== 'none' &&
-        Utils.hasDuration(style.getPropertyValue(Utils.transition.name + '-duration'))) {
+      if (Utils.hasTransition(style)) {
         count++;
-        events += (events ? ' ' : '') + Utils.transition.event;
+        events += (events ? ' ' : '') + Utils.TRANSITIONEND_EVENTS[Utils.transition];
       }
 
       // 有动画做事件监听
