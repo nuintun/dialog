@@ -240,7 +240,7 @@
       // transition-property
       style.getPropertyValue(transition + '-property') !== 'none' &&
       // transition-duration
-      Utils.hasDuration(style.getPropertyValue(transition + '-duration'));
+      hasDuration(style.getPropertyValue(transition + '-duration'));
   }
 
   // 公用遮罩
