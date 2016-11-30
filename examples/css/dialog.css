@@ -5,18 +5,28 @@
     -webkit-transform: scale(.5);
     transform: scale(.5)
   }
+  70% {
+    -webkit-transform: scale(1.05);
+    transform: scale(1.05)
+  }
   100% {
     opacity: 1;
     -webkit-transform: scale(1);
     transform: scale(1)
   }
 }
+
 @keyframes bounceIn {
   0% {
     opacity: 0;
     -webkit-transform: scale(.5);
     -ms-transform: scale(.5);
     transform: scale(.5)
+  }
+  70% {
+    -webkit-transform: scale(1.05);
+    -ms-transform: scale(1.05);
+    transform: scale(1.05)
   }
   100% {
     opacity: 1;
@@ -25,6 +35,7 @@
     transform: scale(1)
   }
 }
+
 @-webkit-keyframes bounceOut {
   /* 关闭动画 */
   100% {
@@ -41,6 +52,7 @@
     transform: scale(1);
   }
 }
+
 @keyframes bounceOut {
   100% {
     opacity: 0;
@@ -59,26 +71,31 @@
     transform: scale(1);
   }
 }
+
 .ui-modal-dialog-mask {
   background: #fff;
   opacity: .65;
-  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=65);
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=65);
+  -ms-filter: alpha(Opacity=65);
+  filter: alpha(Opacity=65);
 }
+
 :root .ui-modal-dialog-mask {
   filter: none\9;
 }
+
 .ui-dialog {
   /* http://ued.taobao.com/blog/2011/04/onfocus-this-blur/ */
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
-  -webkit-animation-duration: .3s;
-  animation-duration: .3s;
+  -webkit-animation-duration: .25s;
+  animation-duration: .25s;
 }
+
 .ui-dialog-show {
   -webkit-animation-name: bounceIn;
   animation-name: bounceIn;
 }
+
 .ui-dialog-close {
   -webkit-animation-name: bounceOut;
   animation-name: bounceOut;
