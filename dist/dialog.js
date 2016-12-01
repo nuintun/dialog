@@ -883,14 +883,15 @@
       var scrollTop = fixed ? 0 : __document.scrollTop();
       var clientWidth = __window.width();
       var clientHeight = __window.height();
-      var width = dialog.width();
-      var height = dialog.height();
-      var left = (clientWidth - width) / 2 + scrollLeft;
-      var top = (clientHeight - height) * 382 / 1000 + scrollTop; // 黄金比例
-      var style = context.node.style;
+      var dialogWidth = dialog.outerWidth();
+      var dialogHeight = dialog.outerHeight();
+      var top = (clientHeight - dialogHeight) * 382 / 1000 + scrollTop; // 黄金比例
+      var left = (clientWidth - dialogWidth) / 2 + scrollLeft;
 
-      style.left = Math.max(parseInt(left), scrollLeft) + 'px';
-      style.top = Math.max(parseInt(top), scrollTop) + 'px';
+      dialog.css({
+        top: Math.max(parseInt(top), scrollTop),
+        left: Math.max(parseInt(left), scrollLeft)
+      });
     },
     /**
      * 指定位置
@@ -900,12 +901,15 @@
       var context = this;
       var dialog = context.__node;
 
+      // 移除跟随定位类名
       if (context.__align) {
         dialog.removeClass(context.__align);
       }
 
+      // 不能是根节点
       anchor = anchor.parentNode && $(anchor);
 
+      // 定位元素不存在
       if (!anchor || !anchor.length) {
         return context.__center();
       }
@@ -926,20 +930,20 @@
       var scrollLeft = __document.scrollLeft();
       var scrollTop = __document.scrollTop();
 
-      var width = dialog.width();
-      var height = dialog.height();
-      var width = anchor ? anchor.outerWidth() : 0;
-      var height = anchor ? anchor.outerHeight() : 0;
+      var dialogWidth = dialog.outerWidth();
+      var dialogHeight = dialog.outerHeight();
+      var anchorWidth = anchor ? anchor.outerWidth() : 0;
+      var anchorHeight = anchor ? anchor.outerHeight() : 0;
       var offset = context.__offset(anchor[0]);
       var x = offset.left;
       var y = offset.top;
       var left = fixed ? x - scrollLeft : x;
       var top = fixed ? y - scrollTop : y;
 
-      var minLeft = fixed ? 0 : scrollLeft;
       var minTop = fixed ? 0 : scrollTop;
-      var maxLeft = minLeft + clientWidth - width;
-      var maxTop = minTop + clientHeight - height;
+      var minLeft = fixed ? 0 : scrollLeft;
+      var maxTop = minTop + clientHeight - dialogHeight;
+      var maxLeft = minLeft + clientWidth - dialogWidth;
 
       var css = {};
       var align = context.align.split(ALIGNSPLIT);
@@ -948,11 +952,24 @@
       var name = { top: 'top', bottom: 'top', left: 'left', right: 'left' };
 
       var temp = [
-        { top: top - height, bottom: top + height, left: left - width, right: left + width },
-        { top: top, bottom: top - height + height, left: left, right: left - width + width }
+        {
+          top: top - dialogHeight,
+          bottom: top + anchorHeight,
+          left: left - dialogWidth,
+          right: left + anchorWidth
+        },
+        {
+          top: top,
+          bottom: top - dialogHeight + anchorHeight,
+          left: left,
+          right: left - dialogWidth + anchorWidth
+        }
       ];
 
-      var center = { left: left + width / 2 - width / 2, top: top + height / 2 - height / 2 };
+      var center = {
+        top: top + anchorHeight / 2 - dialogHeight / 2,
+        left: left + anchorWidth / 2 - dialogWidth / 2
+      };
 
       var range = {
         left: [minLeft, maxLeft],
@@ -1016,20 +1033,20 @@
         return offset;
       }
 
+      // {Element: Ifarme}
+      var frameElement = defaultView.frameElement;
+
       ownerDocument = $(ownerDocument);
 
       var scrollLeft = ownerDocument.scrollLeft();
       var scrollTop = ownerDocument.scrollTop();
-
-      // {Element: Ifarme}
-      var frameElement = defaultView.frameElement;
       var frameOffset = $(frameElement).offset();
       var frameLeft = frameOffset.left;
       var frameTop = frameOffset.top;
 
       return {
-        left: offset.left + frameLeft - scrollLeft,
-        top: offset.top + frameTop - scrollTop
+        top: offset.top + frameTop - scrollTop,
+        left: offset.left + frameLeft - scrollLeft
       };
     }
   };

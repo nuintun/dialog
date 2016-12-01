@@ -7,6 +7,8 @@ body {
   font-family: Microsoft Yahei, SimHei, tahoma, arial, Hiragino Sans GB, SimSun, sans-serif;
   font-weight: 400;
   color: #424242;
+  margin: 0;
+  padding: 0;
 }
 
 .main {
