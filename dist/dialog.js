@@ -273,6 +273,7 @@
       delays = delays.concat(delays);
     }
 
+    // 获取最大时长
     return Math.max.apply(null, map(durations, function(duration, i) {
       return toMs(duration) + toMs(delays[i]);
     }));
@@ -319,6 +320,7 @@
     var info = getEffectsInfo(element);
     var type = info.type;
 
+    // 没有动画
     if (!type) {
       return callback();
     }

@@ -63,6 +63,7 @@ function getTimeout(delays, durations) {
     delays = delays.concat(delays);
   }
 
+  // 获取最大时长
   return Math.max.apply(null, Utils.map(durations, function(duration, i) {
     return toMs(duration) + toMs(delays[i]);
   }));
@@ -109,6 +110,7 @@ export function whenEffectsEnd(node, callback) {
   var info = getEffectsInfo(element);
   var type = info.type;
 
+  // 没有动画
   if (!type) {
     return callback();
   }
