@@ -21,8 +21,8 @@ export var Mask = {
   // 锁定 tab 焦点层
   backdrop: $('<div tableindex="0"></div>').css({
     position: 'fixed',
-    top: -1,
-    left: -1,
+    top: 0,
+    left: 0,
     width: 0,
     height: 0,
     opacity: 0
