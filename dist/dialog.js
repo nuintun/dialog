@@ -458,7 +458,7 @@
     // 浮层 DOM 元素节点[*]
     node: null,
     // 跟随的 DOM 元素节点[*]
-    follow: null,
+    anchor: null,
     // 是否开启固定定位[*]
     fixed: false,
     // 判断对话框是否删除[*]
@@ -493,7 +493,7 @@
 
       context.open = true;
       context.__activeElement = context.__getActive();
-      context.follow = arguments.length ? anchor : context.follow;
+      context.anchor = arguments.length ? anchor : context.anchor;
 
       // 初始化 show 方法
       if (!context.__ready) {
@@ -690,11 +690,11 @@
       }
 
       // 跟随元素
-      var follow = context.follow;
+      var anchor = context.anchor;
 
       // 如果没有跟随居中显示
-      if (follow) {
-        context.__follow(follow);
+      if (anchor) {
+        context.__follow(anchor);
       } else {
         context.__center();
       }
@@ -1000,7 +1000,7 @@
         temp[1][align[1]] = center[name[align[1]]];
       }
 
-      //添加follow的css, 为了给css使用
+      //添加anchor的css, 为了给css使用
       className += align.join('-') + ' ' + context.className + '-follow';
 
       // 保存对齐类名
