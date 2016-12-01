@@ -37,7 +37,7 @@ export var Mask = {
 
       anchor = anchor.node;
 
-      Mask.node.css('z-index', 'auto').insertBefore(anchor);
+      Mask.node.insertBefore(anchor);
       Mask.backdrop.insertAfter(anchor);
     }
   },
@@ -56,10 +56,25 @@ export var Mask = {
       Mask.node.remove();
       Mask.backdrop.remove();
     } else {
-      anchor = Mask.alloc[length - 1].node;
+      anchor = Mask.alloc[length - 1];
+
+      Mask.zIndex(anchor.zIndex);
+
+      anchor = anchor.node;
 
       Mask.node.insertBefore(anchor);
       Mask.backdrop.insertAfter(anchor);
     }
+  },
+  /**
+   * 设置弹窗层级
+   */
+  zIndex: function(zIndex) {
+    // 最小为 0
+    zIndex = Math.max(0, --zIndex);
+
+    // 设定 z-index
+    Mask.node.css('z-index', zIndex);
+    Mask.backdrop.css('z-index', zIndex);
   }
 };

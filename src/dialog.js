@@ -410,6 +410,8 @@ Dialog.prototype = {
       context.__focus(autofocus);
     }
 
+    // 设置遮罩层级
+    Mask.zIndex(index);
     // 设置弹窗层级
     dialog.css('zIndex', index);
 
