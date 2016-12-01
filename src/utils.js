@@ -2,11 +2,12 @@ var AP = Array.prototype;
 var APFilter = AP.filter;
 var APIndexOf = AP.indexOf;
 var APForEach = AP.forEach;
+var APMap = AP.map;
 
 /**
  * filter
- * @param {any} array
- * @param {any} iterator
+ * @param {Array} array
+ * @param {Function} iterator
  * @param {any} context
  * @returns
  */
@@ -38,9 +39,9 @@ export var filter = APFilter ? function(array, iterator, context) {
 
 /**
  * indexOf
- * @param {any} array
+ * @param {Array} array
  * @param {any} value
- * @param {any} from
+ * @param {Number} from
  * @returns
  */
 export var indexOf = APIndexOf ? function(array, value, from) {
@@ -66,8 +67,8 @@ export var indexOf = APIndexOf ? function(array, value, from) {
 
 /**
  * forEach
- * @param {any} array
- * @param {any} iterator
+ * @param {Array} array
+ * @param {Function} iterator
  * @param {any} context
  */
 export var forEach = APForEach ? function(array, iterator, context) {
@@ -80,13 +81,38 @@ export var forEach = APForEach ? function(array, iterator, context) {
   for (var i = 0, length = array.length; i < length; i++) {
     iterator.call(array, array[i], i, array);
   }
+};
+
+/**
+ * map
+ * @param {Array} array
+ * @param {Function} iterator
+ * @param {any} context
+ */
+export var map = APMap ? function(array, iterator, context) {
+  return APMap.call(array, iterator, context);
+} : function(array, iterator, context) {
+  var length = this.length >>> 0;
+  var result = new Array(length);
+
+  if (arguments.length < 3) {
+    context = array;
+  }
+
+  for (var i = 0; i < length; i++) {
+    if (i in array) {
+      result[i] = fn.call(context, array[i], i, array);
+    }
+  }
+
+  return result;
 }
 
 /**
  * getComputedStyle
  * @export
- * @param {any} element
- * @param {any} property
+ * @param {HTMLElement} element
+ * @param {String} property
  * @returns
  */
 export function getComputedStyle(element, property) {
@@ -105,7 +131,7 @@ export function getComputedStyle(element, property) {
   return {
     /**
      * getPropertyValue
-     * @param property
+     * @param {String} property
      */
     getPropertyValue: function(property) {
       if (style) {
@@ -131,106 +157,4 @@ export function getComputedStyle(element, property) {
       }
     }
   };
-}
-
-// 默认样式
-var style = document.documentElement.style;
-// 浏览器前缀
-var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
-
-/**
- * modernizr
- * @param {any} name
- * @returns
- */
-function modernizr(name) {
-  if (style[name] !== undefined) {
-    return name;
-  }
-
-  // 单词首字母大写
-  name = name.replace(/\w/, function(letter) {
-    return letter.toUpperCase();
-  });
-
-  // 检测
-  for (var pfx, i = 0, length = prefixes.length; i < length; i++) {
-    if (style[prefixes[i] + name] !== undefined) {
-      pfx = prefixes[i];
-
-      return pfx + name;
-    }
-  }
-
-  // 不支持
-  return false;
-}
-
-// animation
-export var animation = modernizr('animation');
-
-// transition
-export var transition = modernizr('transition');
-
-// animationend 映射表
-export var ANIMATIONEND_EVENTS = {
-  animation: 'animationend',
-  WebkitAnimation: 'webkitAnimationEnd',
-  MozAnimation: 'mozAnimationEnd',
-  OAnimation: 'oAnimationEnd',
-  msAnimation: 'MSAnimationEnd',
-  KhtmlAnimation: 'khtmlAnimationEnd'
-};
-
-// transition 映射表
-export var TRANSITIONEND_EVENTS = {
-  transition: 'transitionend',
-  WebkitTransition: 'webkitTransitionEnd',
-  MozTransition: 'mozTransitionEnd',
-  OTransition: 'oTransitionEnd',
-  msTransition: 'MSTransitionEnd',
-  KhtmlTransition: 'khtmlTransitionEnd'
-};
-
-/**
- * hasDuration
- * @export
- * @param {any} duration
- */
-function hasDuration(duration) {
-  duration = duration.split(/\s*,\s*/);
-
-  for (var i = 0, length = duration.length; i < length; i++) {
-    if (parseFloat(duration[i]) > 0) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * hasAnimation
- * @param {any} style
- * @returns
- */
-export function hasAnimation(style) {
-  return animation &&
-    // animation-name
-    style.getPropertyValue(animation + '-name') !== 'none' &&
-    // animation-duration
-    hasDuration(style.getPropertyValue(animation + '-duration'));
-}
-
-/**
- * hasTransition
- * @param {any} style
- * @returns
- */
-export function hasTransition(style) {
-  return transition &&
-    // transition-property
-    style.getPropertyValue(transition + '-property') !== 'none' &&
-    // transition-duration
-    hasDuration(style.getPropertyValue(transition + '-duration'));
 }

@@ -1,11 +1,17 @@
 import $ from 'jquery';
 import { Mask } from './mask';
 import * as Utils from './utils';
+import * as Effects from './effects';
 
 var ALIGNSPLIT = /\s+/;
 var __window = $(window);
 var __document = $(document);
 
+/**
+ * Dialog
+ * @constructor
+ * @export
+ */
 export default function Dialog() {
   var context = this;
 
@@ -86,7 +92,7 @@ Dialog.prototype = {
   constructor: Dialog,
   /**
    * 显示浮层（私有）
-   * @param {HTMLElement, Event}  指定位置（可选）
+   * @param {HTMLElement}  指定位置（可选）
    */
   __show: function(anchor) {
     var context = this;
@@ -150,7 +156,7 @@ Dialog.prototype = {
   },
   /**
    * 显示浮层
-   * @param {HTMLElement, Event}  指定位置（可选）
+   * @param {HTMLElement}  指定位置（可选）
    */
   show: function(anchor) {
     var context = this;
@@ -176,7 +182,7 @@ Dialog.prototype = {
   },
   /**
    * 显示模态浮层。
-   * @param {HTMLElement, Event}  指定位置（可选）
+   * @param {HTMLElement}  指定位置（可选）
    */
   showModal: function(anchor) {
     var context = this;
@@ -189,7 +195,7 @@ Dialog.prototype = {
   },
   /**
    * 关闭浮层
-   * @param result
+   * @param {any} result
    */
   close: function(result) {
     var context = this;
@@ -212,8 +218,14 @@ Dialog.prototype = {
 
     var node = context.node;
     var dialog = context.__node;
-    // 隐藏操作
-    var next = function() {
+
+    // 切换弹窗样式
+    dialog
+      .removeClass(context.className + '-show')
+      .addClass(context.className + '-close');
+
+    // 动画完成之后隐藏弹窗
+    Effects.whenEffectsEnd(dialog, function() {
       // 隐藏弹窗
       dialog.hide();
 
@@ -230,49 +242,7 @@ Dialog.prototype = {
 
       // 关闭事件
       context.__dispatchEvent('close');
-    }
-
-    // 切换弹窗样式
-    dialog
-      .removeClass(context.className + '-show')
-      .addClass(context.className + '-close');
-
-    if (Utils.animation || Utils.transition) {
-      var events;
-      var count = 0;
-      var style = Utils.getComputedStyle(node);
-
-      // 是否有 animation 动画
-      if (Utils.hasAnimation(style)) {
-        count++;
-        events = Utils.ANIMATIONEND_EVENTS[Utils.animation];
-      }
-
-      // 是否有 transition 动画
-      if (Utils.hasTransition(style)) {
-        count++;
-        events += (events ? ' ' : '') + Utils.TRANSITIONEND_EVENTS[Utils.transition];
-      }
-
-      // 有动画做事件监听
-      if (count) {
-        var pending = function() {
-          if (!--count) {
-            next();
-
-            // 解除事件绑定
-            dialog.off(events, pending);
-          }
-        };
-
-        // 绑定动画结束事件
-        dialog.on(events, pending);
-      } else {
-        next();
-      }
-    } else {
-      next();
-    }
+    });
 
     return context;
   },
@@ -448,6 +418,7 @@ Dialog.prototype = {
   },
   /**
    * 获取事件缓存
+   * @param {String} type
    */
   __getEventListeners: function(type) {
     var context = this;
@@ -463,7 +434,10 @@ Dialog.prototype = {
 
     return listeners[type];
   },
-  // 派发事件
+  /**
+   * 派发事件
+   * @param {String} type
+   */
   __dispatchEvent: function(type) {
     var returned;
     var context = this;
@@ -488,6 +462,7 @@ Dialog.prototype = {
   },
   /**
    * 对元素安全聚焦
+   * @param {HTMLElement} element
    */
   __focus: function(element) {
     // 防止 iframe 跨域无权限报错
@@ -534,7 +509,7 @@ Dialog.prototype = {
   },
   /**
    * 指定位置
-   * @param    {HTMLElement, Event}  anchor
+   * @param {HTMLElement} anchor
    */
   __follow: function(anchor) {
     var context = this;
@@ -637,6 +612,7 @@ Dialog.prototype = {
   /**
    * 获取元素相对于页面的位置（包括iframe内的元素）
    * 暂时不支持两层以上的 iframe 套嵌
+   * @param {HTMLElement} anchor
    */
   __offset: function(anchor) {
     var isNode = anchor.parentNode;

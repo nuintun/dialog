@@ -10,11 +10,12 @@
   var APFilter = AP.filter;
   var APIndexOf = AP.indexOf;
   var APForEach = AP.forEach;
+  var APMap = AP.map;
 
   /**
    * filter
-   * @param {any} array
-   * @param {any} iterator
+   * @param {Array} array
+   * @param {Function} iterator
    * @param {any} context
    * @returns
    */
@@ -46,9 +47,9 @@
 
   /**
    * indexOf
-   * @param {any} array
+   * @param {Array} array
    * @param {any} value
-   * @param {any} from
+   * @param {Number} from
    * @returns
    */
   var indexOf = APIndexOf ? function(array, value, from) {
@@ -74,8 +75,8 @@
 
   /**
    * forEach
-   * @param {any} array
-   * @param {any} iterator
+   * @param {Array} array
+   * @param {Function} iterator
    * @param {any} context
    */
   var forEach = APForEach ? function(array, iterator, context) {
@@ -91,10 +92,35 @@
   };
 
   /**
+   * map
+   * @param {Array} array
+   * @param {Function} iterator
+   * @param {any} context
+   */
+  var map = APMap ? function(array, iterator, context) {
+    return APMap.call(array, iterator, context);
+  } : function(array, iterator, context) {
+    var length = this.length >>> 0;
+    var result = new Array(length);
+
+    if (arguments.length < 3) {
+      context = array;
+    }
+
+    for (var i = 0; i < length; i++) {
+      if (i in array) {
+        result[i] = fn.call(context, array[i], i, array);
+      }
+    }
+
+    return result;
+  };
+
+  /**
    * getComputedStyle
    * @export
-   * @param {any} element
-   * @param {any} property
+   * @param {HTMLElement} element
+   * @param {String} property
    * @returns
    */
   function getComputedStyle(element, property) {
@@ -113,7 +139,7 @@
     return {
       /**
        * getPropertyValue
-       * @param property
+       * @param {String} property
        */
       getPropertyValue: function(property) {
         if (style) {
@@ -139,108 +165,6 @@
         }
       }
     };
-  }
-
-  // 默认样式
-  var style = document.documentElement.style;
-  // 浏览器前缀
-  var prefixes = ['Webkit', 'Moz', 'O', 'ms', 'Khtml'];
-
-  /**
-   * modernizr
-   * @param {any} name
-   * @returns
-   */
-  function modernizr(name) {
-    if (style[name] !== undefined) {
-      return name;
-    }
-
-    // 单词首字母大写
-    name = name.replace(/\w/, function(letter) {
-      return letter.toUpperCase();
-    });
-
-    // 检测
-    for (var pfx, i = 0, length = prefixes.length; i < length; i++) {
-      if (style[prefixes[i] + name] !== undefined) {
-        pfx = prefixes[i];
-
-        return pfx + name;
-      }
-    }
-
-    // 不支持
-    return false;
-  }
-
-  // animation
-  var animation = modernizr('animation');
-
-  // transition
-  var transition = modernizr('transition');
-
-  // animationend 映射表
-  var ANIMATIONEND_EVENTS = {
-    animation: 'animationend',
-    WebkitAnimation: 'webkitAnimationEnd',
-    MozAnimation: 'mozAnimationEnd',
-    OAnimation: 'oAnimationEnd',
-    msAnimation: 'MSAnimationEnd',
-    KhtmlAnimation: 'khtmlAnimationEnd'
-  };
-
-  // transition 映射表
-  var TRANSITIONEND_EVENTS = {
-    transition: 'transitionend',
-    WebkitTransition: 'webkitTransitionEnd',
-    MozTransition: 'mozTransitionEnd',
-    OTransition: 'oTransitionEnd',
-    msTransition: 'MSTransitionEnd',
-    KhtmlTransition: 'khtmlTransitionEnd'
-  };
-
-  /**
-   * hasDuration
-   * @export
-   * @param {any} duration
-   */
-  function hasDuration(duration) {
-    duration = duration.split(/\s*,\s*/);
-
-    for (var i = 0, length = duration.length; i < length; i++) {
-      if (parseFloat(duration[i]) > 0) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * hasAnimation
-   * @param {any} style
-   * @returns
-   */
-  function hasAnimation(style) {
-    return animation &&
-      // animation-name
-      style.getPropertyValue(animation + '-name') !== 'none' &&
-      // animation-duration
-      hasDuration(style.getPropertyValue(animation + '-duration'));
-  }
-
-  /**
-   * hasTransition
-   * @param {any} style
-   * @returns
-   */
-  function hasTransition(style) {
-    return transition &&
-      // transition-property
-      style.getPropertyValue(transition + '-property') !== 'none' &&
-      // transition-duration
-      hasDuration(style.getPropertyValue(transition + '-duration'));
   }
 
   // 公用遮罩
@@ -286,10 +210,159 @@
     }
   };
 
+  // 默认样式
+  var styles = document.documentElement.style;
+
+  // animationend 映射表
+  var ANIMATIONEND_EVENTS = {
+    animation: 'animationend',
+    WebkitAnimation: 'webkitAnimationEnd',
+    MozAnimation: 'mozAnimationEnd',
+    OAnimation: 'oAnimationEnd',
+    msAnimation: 'MSAnimationEnd',
+    KhtmlAnimation: 'khtmlAnimationEnd'
+  };
+
+  // transition 映射表
+  var TRANSITIONEND_EVENTS = {
+    transition: 'transitionend',
+    WebkitTransition: 'webkitTransitionEnd',
+    MozTransition: 'mozTransitionEnd',
+    OTransition: 'oTransitionEnd',
+    msTransition: 'MSTransitionEnd',
+    KhtmlTransition: 'khtmlTransitionEnd'
+  };
+
+  /**
+   * detector
+   * @param {Object} maps
+   * @returns
+   */
+  function detector(maps) {
+    for (var property in maps) {
+      if (maps.hasOwnProperty(property) && styles[property] !== undefined) {
+        return property;
+      }
+    }
+  }
+
+  // animation
+  var ANIMATION = detector(ANIMATIONEND_EVENTS);
+
+  // transition
+  var TRANSITION = detector(TRANSITIONEND_EVENTS);
+
+  /**
+   * toMs
+   * @param {String} value
+   * @returns
+   */
+  function toMs(value) {
+    return Number(value.slice(0, -1)) * 1000;
+  }
+
+  /**
+   * getTimeout
+   * @param {Array} delays
+   * @param {Array} durations
+   * @returns
+   */
+  function getTimeout(delays, durations) {
+    /* istanbul ignore next */
+    while (delays.length < durations.length) {
+      delays = delays.concat(delays);
+    }
+
+    return Math.max.apply(null, map(durations, function(duration, i) {
+      return toMs(duration) + toMs(delays[i]);
+    }));
+  }
+
+  /**
+   * getEffectsInfo
+   * @param {HTMLElement} element
+   * @returns
+   */
+  function getEffectsInfo(element) {
+    var styles = getComputedStyle(element);
+    var transitioneDelays = styles.getPropertyValue(TRANSITION + '-delay').split(', ');
+    var transitionDurations = styles.getPropertyValue(TRANSITION + '-duration').split(', ');
+    var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
+    var animationDelays = styles.getPropertyValue(ANIMATION + '-delay').split(', ');
+    var animationDurations = styles.getPropertyValue(ANIMATION + '-duration').split(', ');
+    var animationTimeout = getTimeout(animationDelays, animationDurations);
+
+    var type;
+    var count;
+    var timeout;
+
+    timeout = Math.max(transitionTimeout, animationTimeout);
+    type = timeout > 0 ? (transitionTimeout > animationTimeout ? TRANSITION : ANIMATION) : null;
+    count = type ? (type === TRANSITION ? transitionDurations.length : animationDurations.length) : 0;
+
+    return {
+      type: type,
+      count: count,
+      timeout: timeout
+    };
+  }
+
+  /**
+   * whenEffectsEnd
+   * @export
+   * @param {jQueryElement} node
+   * @param {Function} callback
+   * @returns
+   */
+  function whenEffectsEnd(node, callback) {
+    var element = node[0];
+    var info = getEffectsInfo(element);
+    var type = info.type;
+
+    if (!type) {
+      return callback();
+    }
+
+    var ended = 0;
+    var count = info.count;
+    var timeout = info.timeout;
+    var event = type === TRANSITION ?
+      TRANSITIONEND_EVENTS[TRANSITION] :
+      ANIMATIONEND_EVENTS[ANIMATION];
+
+    var end = function() {
+      node.off(event, onEnd);
+      callback();
+    };
+
+    var onEnd = function(e) {
+      if (e.target === element) {
+        if (++ended >= count) {
+          end();
+        }
+      }
+    };
+
+    // 防止有些动画没有触发结束事件
+    setTimeout(function() {
+      if (ended < count) {
+        end();
+      }
+    }, timeout + 1);
+
+    // 监听动画完成事件
+    node.on(event, onEnd);
+  }
+
   var ALIGNSPLIT = /\s+/;
   var __window = $(window);
   var __document = $(document);
 
+  /**
+   * Dialog
+   * @constructor
+   * @export
+   */
   function Dialog() {
     var context = this;
 
@@ -370,7 +443,7 @@
     constructor: Dialog,
     /**
      * 显示浮层（私有）
-     * @param {HTMLElement, Event}  指定位置（可选）
+     * @param {HTMLElement}  指定位置（可选）
      */
     __show: function(anchor) {
       var context = this;
@@ -434,7 +507,7 @@
     },
     /**
      * 显示浮层
-     * @param {HTMLElement, Event}  指定位置（可选）
+     * @param {HTMLElement}  指定位置（可选）
      */
     show: function(anchor) {
       var context = this;
@@ -460,7 +533,7 @@
     },
     /**
      * 显示模态浮层。
-     * @param {HTMLElement, Event}  指定位置（可选）
+     * @param {HTMLElement}  指定位置（可选）
      */
     showModal: function(anchor) {
       var context = this;
@@ -473,7 +546,7 @@
     },
     /**
      * 关闭浮层
-     * @param result
+     * @param {any} result
      */
     close: function(result) {
       var context = this;
@@ -496,8 +569,14 @@
 
       var node = context.node;
       var dialog = context.__node;
-      // 隐藏操作
-      var next = function() {
+
+      // 切换弹窗样式
+      dialog
+        .removeClass(context.className + '-show')
+        .addClass(context.className + '-close');
+
+      // 动画完成之后隐藏弹窗
+      whenEffectsEnd(dialog, function() {
         // 隐藏弹窗
         dialog.hide();
 
@@ -514,49 +593,7 @@
 
         // 关闭事件
         context.__dispatchEvent('close');
-      };
-
-      // 切换弹窗样式
-      dialog
-        .removeClass(context.className + '-show')
-        .addClass(context.className + '-close');
-
-      if (animation || transition) {
-        var events;
-        var count = 0;
-        var style = getComputedStyle(node);
-
-        // 是否有 animation 动画
-        if (hasAnimation(style)) {
-          count++;
-          events = ANIMATIONEND_EVENTS[animation];
-        }
-
-        // 是否有 transition 动画
-        if (hasTransition(style)) {
-          count++;
-          events += (events ? ' ' : '') + TRANSITIONEND_EVENTS[transition];
-        }
-
-        // 有动画做事件监听
-        if (count) {
-          var pending = function() {
-            if (!--count) {
-              next();
-
-              // 解除事件绑定
-              dialog.off(events, pending);
-            }
-          };
-
-          // 绑定动画结束事件
-          dialog.on(events, pending);
-        } else {
-          next();
-        }
-      } else {
-        next();
-      }
+      });
 
       return context;
     },
@@ -732,6 +769,7 @@
     },
     /**
      * 获取事件缓存
+     * @param {String} type
      */
     __getEventListeners: function(type) {
       var context = this;
@@ -747,7 +785,10 @@
 
       return listeners[type];
     },
-    // 派发事件
+    /**
+     * 派发事件
+     * @param {String} type
+     */
     __dispatchEvent: function(type) {
       var returned;
       var context = this;
@@ -772,6 +813,7 @@
     },
     /**
      * 对元素安全聚焦
+     * @param {HTMLElement} element
      */
     __focus: function(element) {
       // 防止 iframe 跨域无权限报错
@@ -818,7 +860,7 @@
     },
     /**
      * 指定位置
-     * @param    {HTMLElement, Event}  anchor
+     * @param {HTMLElement} anchor
      */
     __follow: function(anchor) {
       var context = this;
@@ -921,6 +963,7 @@
     /**
      * 获取元素相对于页面的位置（包括iframe内的元素）
      * 暂时不支持两层以上的 iframe 套嵌
+     * @param {HTMLElement} anchor
      */
     __offset: function(anchor) {
       var isNode = anchor.parentNode;
