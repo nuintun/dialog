@@ -1,3 +1,8 @@
+var popup;
+var follow = document.getElementById('follow');
+var modal = document.getElementById('modal');
+var remove = document.getElementById('remove');
+
 function create() {
   var dialog = new Dialog();
 
@@ -21,7 +26,12 @@ function create() {
 
   dialog.addEventListener('close', function() {
     console.log('close');
-    dialog.remove();
+
+    if (remove.checked) {
+      dialog.remove();
+
+      popup = null;
+    }
   });
 
   dialog.addEventListener('beforeremove', function() {
@@ -39,23 +49,20 @@ function create() {
   return dialog;
 }
 
-var follow = document.getElementById('follow');
-var modal = document.getElementById('modal');
-
 $('#button').on('click', function() {
-  var dialog = create();
+  popup = popup || create();
 
   if (!follow.checked) {
     if (!modal.checked) {
-      dialog.show();
+      popup.show();
     } else {
-      dialog.showModal();
+      popup.showModal();
     }
   } else {
     if (!modal.checked) {
-      dialog.show(this);
+      popup.show(this);
     } else {
-      dialog.showModal(this);
+      popup.showModal(this);
     }
   }
 });
