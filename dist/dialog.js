@@ -186,7 +186,7 @@
     }),
     // 锁定 tab 焦点层
     backdrop: $('<div tableindex="0"></div>').css({
-      position: 'absolute',
+      position: 'fixed',
       top: -1,
       left: -1,
       width: 0,
