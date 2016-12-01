@@ -133,7 +133,7 @@ Dialog.prototype = {
 
     // 显示遮罩
     if (context.modal) {
-      Mask.show(context.node);
+      Mask.show(context);
       dialog.addClass(context.className + '-modal');
     }
 
@@ -167,7 +167,7 @@ Dialog.prototype = {
 
       // 关闭遮罩
       if (context.open) {
-        Mask.hide(context.node);
+        Mask.hide(context);
       }
 
       // 移除类名
@@ -231,7 +231,7 @@ Dialog.prototype = {
 
       // 隐藏遮罩
       if (context.modal) {
-        Mask.hide(context.node);
+        Mask.hide(context);
       }
 
       // 恢复焦点，照顾键盘操作的用户
@@ -269,7 +269,7 @@ Dialog.prototype = {
 
     // 隐藏遮罩
     if (context.open && context.modal) {
-      Mask.hide(context.node);
+      Mask.hide(context);
     }
 
     // 从 DOM 中移除节点
@@ -348,8 +348,6 @@ Dialog.prototype = {
 
     // 设置弹窗层级
     dialog.css('zIndex', index);
-    // 设置遮罩层级
-    Mask.node.css('zIndex', index);
 
     // 保存当前激活实例
     Dialog.current = context;

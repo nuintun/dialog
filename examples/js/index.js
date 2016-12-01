@@ -1,7 +1,7 @@
 function create() {
   var dialog = new Dialog();
 
-  dialog.innerHTML = '<div class="ui-dialog-content">hello, world</div>';
+  dialog.innerHTML = '<div class="ui-dialog-content"><span>hello, world</span><a class="button ui-close">关闭</a></div>';
 
   dialog.addEventListener('focus', function() {
     console.log('focus');
@@ -32,9 +32,9 @@ function create() {
     console.log('remove');
   });
 
-  dialog.node.onclick = function() {
+  $(dialog.node).on('click', '.ui-close', function() {
     dialog.close();
-  };
+  });
 
   return dialog;
 }
@@ -42,7 +42,7 @@ function create() {
 var follow = document.getElementById('follow');
 var modal = document.getElementById('modal');
 
-document.getElementById('button').onclick = function() {
+$('#button').on('click', function() {
   var dialog = create();
 
   if (!follow.checked) {
@@ -58,4 +58,4 @@ document.getElementById('button').onclick = function() {
       dialog.showModal(this);
     }
   }
-};
+});

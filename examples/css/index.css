@@ -61,3 +61,9 @@ body {
 label input {
   vertical-align: text-top;
 }
+
+.ui-close {
+  position: absolute;
+  top: 9px;
+  right: 3px;
+}
