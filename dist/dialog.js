@@ -390,6 +390,7 @@
     node.on(event, onEnd);
   }
 
+  // 对齐方式拆分正则
   var ALIGNSPLIT = /\s+/;
   var __window = $(window);
   var __document = $(document);
@@ -423,62 +424,114 @@
   // 原型属性
   Dialog.prototype = {
     /**
-     * 显示事件，在 show()、showModal() 执行
-     * @name Popup.prototype.onshow
-     * @event
-     *
-     * 关闭前事件，在 close() 前执行
-     * @name Popup.prototype.onbeforeclose
-     * @event
-     *
-     * 关闭事件，在 close() 执行
-     * @name Popup.prototype.onclose
-     * @event
-     *
-     * 销毁前事件，在 remove() 前执行
-     * @name Popup.prototype.onbeforeremove
-     * @event
-     *
-     * 销毁事件，在 remove() 执行
-     * @name Popup.prototype.onremove
-     * @event
-     *
-     * 重置事件，在 reset() 执行
-     * @name Popup.prototype.onreset
-     * @event
-     *
-     * 焦点事件，在 foucs() 执行
-     * @name Popup.prototype.onfocus
-     * @event
-     *
-     * 失焦事件，在 blur() 执行
-     * @name Popup.prototype.onblur
-     * @event
+     * 浮层 DOM 元素节点
+     * @public
+     * @readonly
      */
-    // 浮层 DOM 元素节点[*]
     node: null,
-    // 跟随的 DOM 元素节点[*]
+    /**
+     * 跟随的 DOM 元素节点
+     * @public
+     * @readonly
+     */
     anchor: null,
-    // 是否开启固定定位[*]
+    /**
+     * 是否开启固定定位
+     * @public
+     * @property
+     */
     fixed: false,
-    // 判断对话框是否删除[*]
+    /**
+     * 判断对话框是否删除
+     * @public
+     * @readonly
+     */
     destroyed: true,
-    // 判断对话框是否显示
+    /**
+     * 判断对话框是否显示
+     * @public
+     * @readonly
+     */
     open: false,
-    // close 返回值
+    /**
+     * close 返回值
+     * @public
+     * @property
+     */
     returnValue: undefined,
-    // 是否自动聚焦
+    /**
+     * 是否自动聚焦
+     * @public
+     * @property
+     */
     autofocus: true,
-    // 对齐方式[*]
+    /**
+     * 对齐方式
+     * @public
+     * @property
+     */
     align: 'bottom left',
-    // 内部的 HTML 字符串
+    /**
+     * 内部的 HTML 字符串
+     * @public
+     * @property
+     */
     innerHTML: '',
-    // CSS 类名
+    /**
+     * CSS 类名
+     * @public
+     * @property
+     */
     className: 'ui-dialog',
-    // 构造函数
+    /**
+     * 构造函数
+     * @public
+     * @readonly
+     */
     constructor: Dialog,
     /**
+     * 显示事件，在 show()、showModal() 执行
+     * @event
+     * @name Popup.prototype.onshow
+     */
+    /**
+     * 关闭前事件，在 close() 前执行
+     * @event
+     * @name Popup.prototype.onbeforeclose
+     */
+    /**
+     * 关闭事件，在 close() 执行
+     * @event
+     * @name Popup.prototype.onclose
+     */
+    /**
+     * 销毁前事件，在 remove() 前执行
+     * @event
+     * @name Popup.prototype.onbeforeremove
+     */
+    /**
+     * 销毁事件，在 remove() 执行
+     * @event
+     * @name Popup.prototype.onremove
+     */
+    /**
+     * 重置事件，在 reset() 执行
+     * @event
+     * @name Popup.prototype.onreset
+     */
+    /**
+     * 焦点事件，在 foucs() 执行
+     * @event
+     * @name Popup.prototype.onfocus
+     */
+    /**
+     * 失焦事件，在 blur() 执行
+     * @event
+     * @name Popup.prototype.onblur
+     */
+    /**
      * 显示浮层（私有）
+     * @private
      * @param {HTMLElement}  指定位置（可选）
      */
     __show: function(anchor) {
@@ -492,8 +545,8 @@
       var dialog = context.__node;
 
       context.open = true;
+      context.anchor = anchor || null;
       context.__activeElement = context.__getActive();
-      context.anchor = arguments.length ? anchor : context.anchor;
 
       // 初始化 show 方法
       if (!context.__ready) {
@@ -546,6 +599,7 @@
     },
     /**
      * 显示浮层
+     * @public
      * @param {HTMLElement}  指定位置（可选）
      */
     show: function(anchor) {
@@ -572,6 +626,7 @@
     },
     /**
      * 显示模态浮层。
+     * @public
      * @param {HTMLElement}  指定位置（可选）
      */
     showModal: function(anchor) {
@@ -585,6 +640,7 @@
     },
     /**
      * 关闭浮层
+     * @public
      * @param {any} result
      */
     close: function(result) {
@@ -638,6 +694,7 @@
     },
     /**
      * 销毁浮层
+     * @public
      */
     remove: function() {
       var context = this;
@@ -680,6 +737,7 @@
     },
     /**
      * 重置位置
+     * @public
      */
     reset: function() {
       var context = this;
@@ -706,6 +764,7 @@
     },
     /**
      * 让浮层获取焦点
+     * @public
      */
     focus: function() {
       var context = this;
@@ -753,6 +812,7 @@
     },
     /**
      * 让浮层失去焦点。将焦点退还给之前的元素，照顾视力障碍用户
+     * @public
      */
     blur: function() {
       var context = this;
@@ -777,6 +837,7 @@
     },
     /**
      * 添加事件
+     * @public
      * @param   {String}    事件类型
      * @param   {Function}  监听函数
      */
@@ -791,6 +852,7 @@
     },
     /**
      * 删除事件
+     * @public
      * @param   {String}    事件类型
      * @param   {Function}  监听函数
      */
@@ -808,6 +870,7 @@
     },
     /**
      * 获取事件缓存
+     * @private
      * @param {String} type
      */
     __getEventListeners: function(type) {
@@ -826,6 +889,7 @@
     },
     /**
      * 派发事件
+     * @private
      * @param {String} type
      */
     __dispatchEvent: function(type) {
@@ -852,6 +916,7 @@
     },
     /**
      * 对元素安全聚焦
+     * @private
      * @param {HTMLElement} element
      */
     __focus: function(element) {
@@ -866,7 +931,10 @@
         // error
       }
     },
-    // 获取当前焦点的元素
+    /**
+     * 获取当前焦点的元素
+     * @private
+     */
     __getActive: function() {
       try {
         // try: ie8~9, iframe #26
@@ -879,7 +947,10 @@
         // error
       }
     },
-    // 居中浮层
+    /**
+     * 居中浮层
+     * @private
+     */
     __center: function() {
       var context = this;
       var dialog = context.__node;
@@ -900,6 +971,7 @@
     },
     /**
      * 指定位置
+     * @private
      * @param {HTMLElement} anchor
      */
     __follow: function(anchor) {
@@ -1019,6 +1091,7 @@
     /**
      * 获取元素相对于页面的位置（包括iframe内的元素）
      * 暂时不支持两层以上的 iframe 套嵌
+     * @private
      * @param {HTMLElement} anchor
      */
     __offset: function(anchor) {
