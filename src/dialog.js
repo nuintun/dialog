@@ -148,11 +148,12 @@ Dialog.prototype = {
     context.reset();
     // 显示弹窗
     dialog.show();
-    // 聚焦
-    context.focus();
 
     // 触发事件
     context.__dispatchEvent('show');
+
+    // 聚焦
+    context.focus();
 
     return context;
   },
