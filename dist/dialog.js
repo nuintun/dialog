@@ -397,8 +397,8 @@
   Dialog.zIndex = 1024;
   // 顶层浮层的实例
   Dialog.current = null;
-  // 遮罩
-  Dialog.mask = Mask.node;
+  // 遮罩元素
+  Dialog.mask = Mask.node[0];
 
   // 原型属性
   Dialog.prototype = {
