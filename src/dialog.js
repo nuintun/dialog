@@ -502,8 +502,8 @@ Dialog.prototype = {
     var left = (clientWidth - dialogWidth) / 2 + scrollLeft;
 
     dialog.css({
-      top: Math.max(parseInt(top), scrollTop),
-      left: Math.max(parseInt(left), scrollLeft)
+      top: Math.max(parseFloat(top), scrollTop),
+      left: Math.max(parseFloat(left), scrollLeft)
     })
   },
   /**
@@ -618,8 +618,8 @@ Dialog.prototype = {
     dialog.addClass(className);
 
     // 设置样式属性
-    css[name[align[0]]] = parseInt(temp[0][align[0]]);
-    css[name[align[1]]] = parseInt(temp[1][align[1]]);
+    css[name[align[0]]] = parseFloat(temp[0][align[0]]);
+    css[name[align[1]]] = parseFloat(temp[1][align[1]]);
 
     // 设置样式
     dialog.css(css);
