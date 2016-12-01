@@ -149,8 +149,8 @@
           }
 
           // Fixed IE float
-          if (prop === 'float') {
-            prop = 'styleFloat';
+          if (property === 'float') {
+            property = 'styleFloat';
           } else {
             // Switch to camelCase for CSSOM
             // DEV: Grabbed from jQuery
@@ -280,17 +280,26 @@
   }
 
   /**
+   * toArray
+   * @param {any} value
+   * @returns {Array}
+   */
+  function toArray(value) {
+    return value ? value.split(', ') : [];
+  }
+
+  /**
    * getEffectsInfo
    * @param {HTMLElement} element
    * @returns
    */
   function getEffectsInfo(element) {
     var styles = getComputedStyle(element);
-    var transitioneDelays = styles.getPropertyValue(TRANSITION + '-delay').split(', ');
-    var transitionDurations = styles.getPropertyValue(TRANSITION + '-duration').split(', ');
+    var transitioneDelays = toArray(styles.getPropertyValue(TRANSITION + '-delay'));
+    var transitionDurations = toArray(styles.getPropertyValue(TRANSITION + '-duration'));
     var transitionTimeout = getTimeout(transitioneDelays, transitionDurations);
-    var animationDelays = styles.getPropertyValue(ANIMATION + '-delay').split(', ');
-    var animationDurations = styles.getPropertyValue(ANIMATION + '-duration').split(', ');
+    var animationDelays = toArray(styles.getPropertyValue(ANIMATION + '-delay'));
+    var animationDurations = toArray(styles.getPropertyValue(ANIMATION + '-duration'));
     var animationTimeout = getTimeout(animationDelays, animationDurations);
 
     var type;
@@ -316,6 +325,11 @@
    * @returns
    */
   function whenEffectsEnd(node, callback) {
+    // 不支持动画
+    if (!ANIMATION && !TRANSITION) {
+      return callback();
+    }
+
     var element = node[0];
     var info = getEffectsInfo(element);
     var type = info.type;

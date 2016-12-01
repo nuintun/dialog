@@ -141,8 +141,8 @@ export function getComputedStyle(element, property) {
         }
 
         // Fixed IE float
-        if (prop === 'float') {
-          prop = 'styleFloat';
+        if (property === 'float') {
+          property = 'styleFloat';
         } else {
           // Switch to camelCase for CSSOM
           // DEV: Grabbed from jQuery
