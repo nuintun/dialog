@@ -528,13 +528,15 @@
       dialog
         .attr('role', context.modal ? 'alertdialog' : 'dialog')
         .removeClass(context.className + '-close')
-        .addClass(context.className + '-show')
-        .show();
+        .addClass(context.className + '-show');
 
-      // 定位聚焦
-      context
-        .reset()
-        .focus();
+      // 定位，先定位再显示
+      // 否则可能在小窗口模式跟随元素定位错误
+      context.reset();
+      // 显示弹窗
+      dialog.show();
+      // 聚焦
+      context.focus();
 
       // 触发事件
       context.__dispatchEvent('show');
@@ -686,8 +688,10 @@
         return context;
       }
 
+      // 跟随元素
       var follow = context.follow;
 
+      // 如果没有跟随居中显示
       if (follow) {
         context.__follow(follow);
       } else {
