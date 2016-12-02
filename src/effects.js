@@ -112,7 +112,7 @@ function getEffectsInfo(element) {
  * @export
  * @param {jQueryElement} node
  * @param {Function} callback
- * @returns
+ * @see https://github.com/vuejs/vue/blob/dev/src/platforms/web/runtime/transition-util.js
  */
 export function whenEffectsEnd(node, callback) {
   // 不支持动画

@@ -121,7 +121,10 @@
    * @export
    * @param {HTMLElement} element
    * @param {String} property
-   * @returns
+   * @returns {Object}
+   * @see https://github.com/the-simian/ie8-getcomputedstyle/blob/master/index.js
+   * @see https://github.com/twolfson/computedStyle/blob/master/lib/computedStyle.js
+   * @see http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle
    */
   function getComputedStyle(element, property) {
     var getComputedStyle = window.getComputedStyle;
@@ -148,19 +151,20 @@
             return style.getPropertyValue(property);
           }
 
-          // Fixed IE float
-          if (property === 'float') {
-            property = 'styleFloat';
-          } else {
-            // Switch to camelCase for CSSOM
-            // DEV: Grabbed from jQuery
-            // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-            // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-            property = property.replace(/-(\w)/gi, function(word, letter) {
-              return letter.toUpperCase();
-            });
+          // Switch to camelCase for CSSOM
+          // DEV: Grabbed from jQuery
+          // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+          // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+          property = property.replace(/-(\w)/gi, function(word, letter) {
+            return letter.toUpperCase();
+          });
+
+          // Old IE
+          if (style.getAttribute) {
+            return style.getAttribute(property);
           }
 
+          // Read property directly
           return style[property];
         }
       }
@@ -357,7 +361,7 @@
    * @export
    * @param {jQueryElement} node
    * @param {Function} callback
-   * @returns
+   * @see https://github.com/vuejs/vue/blob/dev/src/platforms/web/runtime/transition-util.js
    */
   function whenEffectsEnd(node, callback) {
     // 不支持动画
@@ -414,6 +418,7 @@
    * Dialog
    * @constructor
    * @export
+   * @see https://github.com/aui/popupjs/blob/master/src/popup.js
    */
   function Dialog() {
     var context = this;
@@ -421,12 +426,12 @@
     context.destroyed = false;
     context.node = document.createElement('div');
     context.__node = $(context.node)
+      .attr('tabindex', '-1')
       .css({
         display: 'none',
         position: 'absolute',
         outline: 0
-      })
-      .attr('tabindex', '-1');
+      });
   }
 
   // 当前叠加高度

@@ -12,6 +12,7 @@ var __document = $(document);
  * Dialog
  * @constructor
  * @export
+ * @see https://github.com/aui/popupjs/blob/master/src/popup.js
  */
 export default function Dialog() {
   var context = this;
@@ -19,12 +20,12 @@ export default function Dialog() {
   context.destroyed = false;
   context.node = document.createElement('div');
   context.__node = $(context.node)
+    .attr('tabindex', '-1')
     .css({
       display: 'none',
       position: 'absolute',
       outline: 0
-    })
-    .attr('tabindex', '-1');
+    });
 }
 
 // 当前叠加高度

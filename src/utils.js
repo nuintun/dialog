@@ -113,7 +113,10 @@ export var map = APMap ? function(array, iterator, context) {
  * @export
  * @param {HTMLElement} element
  * @param {String} property
- * @returns
+ * @returns {Object}
+ * @see https://github.com/the-simian/ie8-getcomputedstyle/blob/master/index.js
+ * @see https://github.com/twolfson/computedStyle/blob/master/lib/computedStyle.js
+ * @see http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle
  */
 export function getComputedStyle(element, property) {
   var getComputedStyle = window.getComputedStyle;
@@ -140,19 +143,20 @@ export function getComputedStyle(element, property) {
           return style.getPropertyValue(property);
         }
 
-        // Fixed IE float
-        if (property === 'float') {
-          property = 'styleFloat';
-        } else {
-          // Switch to camelCase for CSSOM
-          // DEV: Grabbed from jQuery
-          // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
-          // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
-          property = property.replace(/-(\w)/gi, function(word, letter) {
-            return letter.toUpperCase();
-          });
+        // Switch to camelCase for CSSOM
+        // DEV: Grabbed from jQuery
+        // https://github.com/jquery/jquery/blob/1.9-stable/src/css.js#L191-L194
+        // https://github.com/jquery/jquery/blob/1.9-stable/src/core.js#L593-L597
+        property = property.replace(/-(\w)/gi, function(word, letter) {
+          return letter.toUpperCase();
+        });
+
+        // Old IE
+        if (style.getAttribute) {
+          return style.getAttribute(property);
         }
 
+        // Read property directly
         return style[property];
       }
     }
