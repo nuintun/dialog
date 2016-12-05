@@ -1,4 +1,5 @@
 var popup;
+var __window = $(window);
 var follow = document.getElementById('follow');
 var modal = document.getElementById('modal');
 var remove = document.getElementById('remove');
@@ -7,6 +8,12 @@ function create() {
   var dialog = new Dialog();
 
   dialog.innerHTML = '<div class="ui-dialog-content"><span>hello, world</span><a class="button ui-close">关闭</a></div>';
+
+  var reset = function() {
+    dialog.reset();
+  };
+
+  __window.on('resize', reset);
 
   dialog.addEventListener('focus', function() {
     console.log('focus');
@@ -40,6 +47,8 @@ function create() {
 
   dialog.addEventListener('remove', function() {
     console.log('remove');
+
+    __window.off('resize', reset);
   });
 
   $(dialog.node).on('click', '.ui-close', function() {

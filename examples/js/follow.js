@@ -1,6 +1,11 @@
 var dialog;
+var __window = $(window);
 var follow = $('#follow-elem');
 var alignView = $('#test-align-value');
+
+__window.on('resize.dialog', function() {
+  dialog && dialog.reset();
+});
 
 follow
   .on('click', '[type=radio]', function() {
