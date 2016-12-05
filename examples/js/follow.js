@@ -8,7 +8,7 @@ __window.on('resize.dialog', function() {
 });
 
 follow
-  .on('click', '[type=radio]', function() {
+  .on('change', '[type=radio]', function() {
     if (dialog) {
       dialog.close();
     }
@@ -35,4 +35,4 @@ follow
     alignView.html(align);
   })
   .find(':radio:checked')
-  .trigger('click');
+  .trigger('change');
