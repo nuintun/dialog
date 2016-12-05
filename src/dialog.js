@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import { Mask } from './mask';
 import * as Utils from './utils';
 import * as Effects from './effects';
+import { Backdrop } from './backdrop';
 
 // 对齐方式拆分正则
 var ALIGNSPLIT = /\s+/;
@@ -33,7 +33,7 @@ Dialog.zIndex = 1024;
 // 顶层浮层的实例
 Dialog.current = null;
 // 遮罩元素
-Dialog.mask = Mask.node[0];
+Dialog.backdrop = Backdrop.node[0];
 
 // 原型属性
 Dialog.prototype = {
@@ -187,7 +187,7 @@ Dialog.prototype = {
 
     // 显示遮罩
     if (context.modal) {
-      Mask.show(context);
+      Backdrop.show(context);
       dialog.addClass(context.className + '-modal');
     }
 
@@ -225,7 +225,7 @@ Dialog.prototype = {
 
       // 关闭遮罩
       if (context.open) {
-        Mask.hide(context);
+        Backdrop.hide(context);
       }
 
       // 移除类名
@@ -291,7 +291,7 @@ Dialog.prototype = {
 
       // 隐藏遮罩
       if (context.modal) {
-        Mask.hide(context);
+        Backdrop.hide(context);
       }
 
       // 恢复焦点，照顾键盘操作的用户
@@ -330,7 +330,7 @@ Dialog.prototype = {
 
     // 隐藏遮罩
     if (context.open && context.modal) {
-      Mask.hide(context);
+      Backdrop.hide(context);
     }
 
     // 从 DOM 中移除节点
@@ -412,7 +412,7 @@ Dialog.prototype = {
     }
 
     // 设置遮罩层级
-    Mask.zIndex(index);
+    Backdrop.zIndex(index);
     // 设置弹窗层级
     dialog.css('zIndex', index);
 
@@ -586,7 +586,7 @@ Dialog.prototype = {
     })
   },
   /**
-   * 指定位置
+   * 跟随元素
    * @private
    * @param {HTMLElement} anchor
    */

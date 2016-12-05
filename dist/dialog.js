@@ -171,84 +171,6 @@
     };
   }
 
-  // 公用遮罩
-  var Mask = {
-    // 遮罩分配
-    alloc: [],
-    // 遮罩节点
-    node: $('<div class="ui-modal-dialog-mask" tableindex="0"></div>').css({
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      width: '100%',
-      height: '100%',
-      zIndex: 'auto',
-      overflow: 'hidden',
-      userSelect: 'none'
-    }),
-    // 锁定 tab 焦点层
-    backdrop: $('<div tableindex="0"></div>').css({
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      opacity: 0
-    }),
-    /**
-     * 显示遮罩
-     * @param {Dialog} anchor 定位弹窗实例
-     */
-    show: function(anchor) {
-      if (indexOf(Mask.alloc, anchor) === -1) {
-        Mask.alloc.push(anchor);
-
-        anchor = anchor.node;
-
-        Mask.node.insertBefore(anchor);
-        Mask.backdrop.insertAfter(anchor);
-      }
-    },
-    /**
-     * 隐藏遮罩
-     * @param {Dialog} anchor 定位弹窗实例
-     */
-    hide: function(anchor) {
-      Mask.alloc = filter(Mask.alloc, function(item) {
-        return anchor !== item;
-      });
-
-      var length = Mask.alloc.length;
-
-      if (length === 0) {
-        Mask.node.remove();
-        Mask.backdrop.remove();
-      } else {
-        anchor = Mask.alloc[length - 1];
-
-        Mask.zIndex(anchor.zIndex);
-
-        anchor = anchor.node;
-
-        Mask.node.insertBefore(anchor);
-        Mask.backdrop.insertAfter(anchor);
-      }
-    },
-    /**
-     * 设置弹窗层级
-     */
-    zIndex: function(zIndex) {
-      // 最小为 0
-      zIndex = Math.max(0, --zIndex);
-
-      // 设定 z-index
-      Mask.node.css('z-index', zIndex);
-      Mask.backdrop.css('z-index', zIndex);
-    }
-  };
-
   // 默认样式
   var styles = document.documentElement.style;
 
@@ -409,6 +331,92 @@
     node.on(event, onEnd);
   }
 
+  // 公用遮罩
+  var Backdrop = {
+    // 遮罩分配
+    alloc: [],
+    // 遮罩节点
+    node: $('<div tableindex="0"></div>').css({
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: 'auto',
+      overflow: 'hidden',
+      userSelect: 'none'
+    }),
+    // 锁定 tab 焦点层
+    locker: $('<div tableindex="0"></div>').css({
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0,
+      opacity: 0
+    }),
+    /**
+     * 设置弹窗层级
+     */
+    zIndex: function(zIndex) {
+      // 最小为 0
+      zIndex = Math.max(0, --zIndex);
+
+      // 设定 z-index
+      Backdrop.node.css('z-index', zIndex);
+      Backdrop.locker.css('z-index', zIndex);
+    },
+    /**
+     * 依附实例
+     * @param {Dialog} anchor 定位弹窗实例
+     */
+    attach: function(anchor) {
+      var className = anchor.className + '-backdrop';
+
+      anchor = anchor.node;
+
+      Backdrop.node
+        .addClass(className)
+        .insertBefore(anchor);
+
+      Backdrop.locker.insertAfter(anchor);
+    },
+    /**
+     * 显示遮罩
+     * @param {Dialog} anchor 定位弹窗实例
+     */
+    show: function(anchor) {
+      if (indexOf(Backdrop.alloc, anchor) === -1) {
+        Backdrop.attach(anchor);
+        Backdrop.alloc.push(anchor);
+      }
+    },
+
+    /**
+     * 隐藏遮罩
+     * @param {Dialog} anchor 定位弹窗实例
+     */
+    hide: function(anchor) {
+      Backdrop.alloc = filter(Backdrop.alloc, function(item) {
+        return anchor !== item;
+      });
+
+      var length = Backdrop.alloc.length;
+
+      if (length === 0) {
+        Backdrop.node.remove();
+        Backdrop.locker.remove();
+      } else {
+        anchor = Backdrop.alloc[length - 1];
+
+        Backdrop.zIndex(anchor.zIndex);
+        Backdrop.attach(anchor);
+      }
+    }
+  };
+
   // 对齐方式拆分正则
   var ALIGNSPLIT = /\s+/;
   var __window = $(window);
@@ -439,7 +447,7 @@
   // 顶层浮层的实例
   Dialog.current = null;
   // 遮罩元素
-  Dialog.mask = Mask.node[0];
+  Dialog.backdrop = Backdrop.node[0];
 
   // 原型属性
   Dialog.prototype = {
@@ -593,7 +601,7 @@
 
       // 显示遮罩
       if (context.modal) {
-        Mask.show(context);
+        Backdrop.show(context);
         dialog.addClass(context.className + '-modal');
       }
 
@@ -631,7 +639,7 @@
 
         // 关闭遮罩
         if (context.open) {
-          Mask.hide(context);
+          Backdrop.hide(context);
         }
 
         // 移除类名
@@ -697,7 +705,7 @@
 
         // 隐藏遮罩
         if (context.modal) {
-          Mask.hide(context);
+          Backdrop.hide(context);
         }
 
         // 恢复焦点，照顾键盘操作的用户
@@ -736,7 +744,7 @@
 
       // 隐藏遮罩
       if (context.open && context.modal) {
-        Mask.hide(context);
+        Backdrop.hide(context);
       }
 
       // 从 DOM 中移除节点
@@ -818,7 +826,7 @@
       }
 
       // 设置遮罩层级
-      Mask.zIndex(index);
+      Backdrop.zIndex(index);
       // 设置弹窗层级
       dialog.css('zIndex', index);
 
@@ -992,7 +1000,7 @@
       });
     },
     /**
-     * 指定位置
+     * 跟随元素
      * @private
      * @param {HTMLElement} anchor
      */

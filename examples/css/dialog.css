@@ -72,14 +72,14 @@
   }
 }
 
-.ui-modal-dialog-mask {
+.ui-dialog-backdrop {
   background: #fff;
   opacity: .65;
   -ms-filter: alpha(Opacity=65);
   filter: alpha(Opacity=65);
 }
 
-:root .ui-modal-dialog-mask {
+:root .ui-dialog-backdrop {
   filter: none\9;
 }
 
