@@ -5,6 +5,8 @@ import * as Utils from './utils';
 export var Backdrop = {
   // 遮罩分配
   alloc: [],
+  // 获取焦点回调事件
+  fallback: null,
   // 遮罩节点
   node: $('<div tabindex="0"></div>').css({
     position: 'fixed',
@@ -35,15 +37,22 @@ export var Backdrop = {
    * @param {Dialog} anchor 定位弹窗实例
    */
   attach: function(anchor) {
+    var node = anchor.node;
     var className = anchor.className + '-backdrop';
 
-    anchor = anchor.node;
+    // 锁定焦点
+    Backdrop.fallback = function() {
+      anchor.focus();
+    };
 
     Backdrop.node
+      .on('focus', Backdrop.fallback)
       .addClass(className)
-      .insertBefore(anchor);
+      .insertBefore(node);
 
-    Backdrop.locker.insertAfter(anchor);
+    Backdrop.locker
+      .on('focus', Backdrop.fallback)
+      .insertAfter(node);
   },
   /**
    * 显示遮罩
@@ -67,9 +76,14 @@ export var Backdrop = {
 
     var length = Backdrop.alloc.length;
 
+    Backdrop.node.off('focus', Backdrop.fallback);
+    Backdrop.locker.off('focus', Backdrop.fallback);
+
     if (length === 0) {
       Backdrop.node.remove();
       Backdrop.locker.remove();
+
+      Backdrop.fallback = null;
     } else {
       anchor = Backdrop.alloc[length - 1];
 

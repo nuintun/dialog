@@ -335,6 +335,8 @@
   var Backdrop = {
     // 遮罩分配
     alloc: [],
+    // 获取焦点回调事件
+    fallback: null,
     // 遮罩节点
     node: $('<div tabindex="0"></div>').css({
       position: 'fixed',
@@ -365,15 +367,22 @@
      * @param {Dialog} anchor 定位弹窗实例
      */
     attach: function(anchor) {
+      var node = anchor.node;
       var className = anchor.className + '-backdrop';
 
-      anchor = anchor.node;
+      // 锁定焦点
+      Backdrop.fallback = function() {
+        anchor.focus();
+      };
 
       Backdrop.node
+        .on('focus', Backdrop.fallback)
         .addClass(className)
-        .insertBefore(anchor);
+        .insertBefore(node);
 
-      Backdrop.locker.insertAfter(anchor);
+      Backdrop.locker
+        .on('focus', Backdrop.fallback)
+        .insertAfter(node);
     },
     /**
      * 显示遮罩
@@ -397,9 +406,14 @@
 
       var length = Backdrop.alloc.length;
 
+      Backdrop.node.off('focus', Backdrop.fallback);
+      Backdrop.locker.off('focus', Backdrop.fallback);
+
       if (length === 0) {
         Backdrop.node.remove();
         Backdrop.locker.remove();
+
+        Backdrop.fallback = null;
       } else {
         anchor = Backdrop.alloc[length - 1];
 
@@ -788,14 +802,14 @@
      */
     focus: function() {
       var context = this;
+      var current = Dialog.current;
 
-      // 销毁和未打开不做处理
-      if (context.destroyed || !context.open) {
+      // 销毁，未打开和已经得到焦点不做处理
+      if (context.destroyed || !context.open || current === context) {
         return context;
       }
 
       var node = context.node;
-      var current = Dialog.current;
       var dialog = context.__node;
       var index = context.zIndex = Dialog.zIndex++;
 

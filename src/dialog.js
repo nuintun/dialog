@@ -382,14 +382,14 @@ Dialog.prototype = {
    */
   focus: function() {
     var context = this;
+    var current = Dialog.current;
 
-    // 销毁和未打开不做处理
-    if (context.destroyed || !context.open) {
+    // 销毁，未打开和已经得到焦点不做处理
+    if (context.destroyed || !context.open || current === context) {
       return context;
     }
 
     var node = context.node;
-    var current = Dialog.current;
     var dialog = context.__node;
     var index = context.zIndex = Dialog.zIndex++;
 
