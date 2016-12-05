@@ -703,6 +703,9 @@
         .removeClass(context.className + '-show')
         .addClass(context.className + '-close');
 
+      // 恢复焦点，照顾键盘操作的用户
+      context.blur();
+
       // 动画完成之后隐藏弹窗
       whenEffectsEnd(dialog, function() {
         // 隐藏弹窗
@@ -712,9 +715,6 @@
         if (context.modal) {
           Backdrop.hide(context);
         }
-
-        // 恢复焦点，照顾键盘操作的用户
-        context.blur();
 
         // 切换打开状态
         context.open = false;
