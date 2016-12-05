@@ -15,7 +15,7 @@ export var Backdrop = {
     userSelect: 'none'
   }),
   // 锁定 tab 焦点层
-  locker: $('<div tabindex="0"></div>').css({
+  shim: $('<div tabindex="0"></div>').css({
     width: 0,
     height: 0,
     opacity: 0
@@ -42,7 +42,7 @@ export var Backdrop = {
       .addClass(className)
       .insertBefore(node);
 
-    Backdrop.locker.insertAfter(node);
+    Backdrop.shim.insertAfter(node);
   },
   /**
    * 显示遮罩
@@ -68,7 +68,7 @@ export var Backdrop = {
 
     if (length === 0) {
       Backdrop.node.remove();
-      Backdrop.locker.remove();
+      Backdrop.shim.remove();
     } else {
       anchor = Backdrop.alloc[length - 1];
 
