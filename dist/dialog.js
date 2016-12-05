@@ -340,19 +340,12 @@
       position: 'fixed',
       top: 0,
       left: 0,
-      right: 0,
-      bottom: 0,
       width: '100%',
       height: '100%',
-      zIndex: 'auto',
-      overflow: 'hidden',
       userSelect: 'none'
     }),
     // 锁定 tab 焦点层
     locker: $('<div tabindex="0"></div>').css({
-      position: 'fixed',
-      top: 0,
-      left: 0,
       width: 0,
       height: 0,
       opacity: 0
@@ -366,7 +359,6 @@
 
       // 设定 z-index
       Backdrop.node.css('z-index', zIndex);
-      Backdrop.locker.css('z-index', zIndex);
     },
     /**
      * 依附实例
