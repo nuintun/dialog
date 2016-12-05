@@ -77,6 +77,7 @@
   opacity: .65;
   -ms-filter: alpha(Opacity=65);
   filter: alpha(Opacity=65);
+  outline: 0;
 }
 
 :root .ui-dialog-backdrop {
