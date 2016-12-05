@@ -371,7 +371,8 @@
       var className = anchor.className + '-backdrop';
 
       // 锁定焦点
-      Backdrop.fallback = function() {
+      Backdrop.fallback = function(e) {
+        e.preventDefault();
         anchor.focus();
       };
 
@@ -802,16 +803,15 @@
      */
     focus: function() {
       var context = this;
-      var current = Dialog.current;
 
       // 销毁，未打开和已经得到焦点不做处理
-      if (context.destroyed || !context.open || current === context) {
+      if (context.destroyed || !context.open) {
         return context;
       }
 
       var node = context.node;
       var dialog = context.__node;
-      var index = context.zIndex = Dialog.zIndex++;
+      var current = Dialog.current;
 
       if (current && current !== context) {
         current.blur(false);
@@ -831,18 +831,23 @@
         context.__focus(autofocus);
       }
 
-      // 设置遮罩层级
-      Backdrop.zIndex(index);
-      // 设置弹窗层级
-      dialog.css('zIndex', index);
+      // 非激活状态才做处理
+      if (current !== context) {
+        var index = context.zIndex = Dialog.zIndex++;
 
-      // 保存当前激活实例
-      Dialog.current = context;
+        // 设置遮罩层级
+        Backdrop.zIndex(index);
+        // 设置弹窗层级
+        dialog.css('zIndex', index);
 
-      // 添加激活类名
-      dialog.addClass(context.className + '-focus');
-      // 触发事件
-      context.__dispatchEvent('focus');
+        // 添加激活类名
+        dialog.addClass(context.className + '-focus');
+        // 触发事件
+        context.__dispatchEvent('focus');
+
+        // 保存当前激活实例
+        Dialog.current = context;
+      }
 
       return context;
     },

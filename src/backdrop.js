@@ -41,7 +41,8 @@ export var Backdrop = {
     var className = anchor.className + '-backdrop';
 
     // 锁定焦点
-    Backdrop.fallback = function() {
+    Backdrop.fallback = function(e) {
+      e.preventDefault();
       anchor.focus();
     };
 
