@@ -6,7 +6,7 @@ export var Backdrop = {
   // 遮罩分配
   alloc: [],
   // 遮罩节点
-  node: $('<div tableindex="0"></div>').css({
+  node: $('<div tabindex="0"></div>').css({
     position: 'fixed',
     top: 0,
     left: 0,
@@ -19,7 +19,7 @@ export var Backdrop = {
     userSelect: 'none'
   }),
   // 锁定 tab 焦点层
-  locker: $('<div tableindex="0"></div>').css({
+  locker: $('<div tabindex="0"></div>').css({
     position: 'fixed',
     top: 0,
     left: 0,
