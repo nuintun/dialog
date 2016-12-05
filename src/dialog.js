@@ -35,6 +35,20 @@ Dialog.current = null;
 // 遮罩元素
 Dialog.backdrop = Backdrop.node[0];
 
+// 锁定 tab 焦点在弹窗内
+__document.on('focusin', function(e) {
+  var current = Dialog.current;
+
+  if (current && current.modal) {
+    var target = e.target;
+    var node = current.node;
+
+    if (target !== node && !node.contains(target)) {
+      current.focus();
+    }
+  }
+});
+
 // 原型属性
 Dialog.prototype = {
   /**

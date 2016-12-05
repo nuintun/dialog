@@ -335,8 +335,6 @@
   var Backdrop = {
     // 遮罩分配
     alloc: [],
-    // 获取焦点回调事件
-    fallback: null,
     // 遮罩节点
     node: $('<div tabindex="0"></div>').css({
       position: 'fixed',
@@ -370,20 +368,11 @@
       var node = anchor.node;
       var className = anchor.className + '-backdrop';
 
-      // 锁定焦点
-      Backdrop.fallback = function(e) {
-        e.preventDefault();
-        anchor.focus();
-      };
-
       Backdrop.node
-        .on('focus', Backdrop.fallback)
         .addClass(className)
         .insertBefore(node);
 
-      Backdrop.locker
-        .on('focus', Backdrop.fallback)
-        .insertAfter(node);
+      Backdrop.locker.insertAfter(node);
     },
     /**
      * 显示遮罩
@@ -407,14 +396,9 @@
 
       var length = Backdrop.alloc.length;
 
-      Backdrop.node.off('focus', Backdrop.fallback);
-      Backdrop.locker.off('focus', Backdrop.fallback);
-
       if (length === 0) {
         Backdrop.node.remove();
         Backdrop.locker.remove();
-
-        Backdrop.fallback = null;
       } else {
         anchor = Backdrop.alloc[length - 1];
 
@@ -455,6 +439,20 @@
   Dialog.current = null;
   // 遮罩元素
   Dialog.backdrop = Backdrop.node[0];
+
+  // 锁定 tab 焦点在弹窗内
+  __document.on('focusin', function(e) {
+    var current = Dialog.current;
+
+    if (current && current.modal) {
+      var target = e.target;
+      var node = current.node;
+
+      if (target !== node && !node.contains(target)) {
+        current.focus();
+      }
+    }
+  });
 
   // 原型属性
   Dialog.prototype = {
