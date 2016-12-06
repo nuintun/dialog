@@ -116,6 +116,13 @@
 
 	.ui-bubble-content {
 	  padding: 10px;
+	  color: red;
+	  background-color: #fff;
+	  -webkit-background-clip: content;
+	  background-clip: content;
+	  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	  -webkit-overflow-scrolling: touch;
+	  pointer-events: auto;
 	}
 
 	.ui-dialog-top-left .ui-bubble,
