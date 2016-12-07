@@ -436,20 +436,20 @@
   // 当前叠加高度
   Dialog.zIndex = 1024;
   // 顶层浮层的实例
-  Dialog.current = null;
+  Dialog.active = null;
   // 遮罩元素
   Dialog.backdrop = Backdrop.node[0];
 
   // 锁定 tab 焦点在弹窗内
   __document.on('focusin', function(e) {
-    var current = Dialog.current;
+    var active = Dialog.active;
 
-    if (current && current.modal) {
+    if (active && active.modal) {
       var target = e.target;
-      var node = current.node;
+      var node = active.node;
 
       if (target !== node && !node.contains(target)) {
-        current.focus();
+        active.focus();
       }
     }
   });
@@ -743,8 +743,8 @@
       }
 
       // 清理激活项
-      if (Dialog.current === context) {
-        Dialog.current = null;
+      if (Dialog.active === context) {
+        Dialog.active = null;
       }
 
       // 隐藏遮罩
@@ -809,18 +809,18 @@
 
       var node = context.node;
       var dialog = context.__node;
-      var current = Dialog.current;
+      var active = Dialog.active;
 
-      if (current && current !== context) {
-        current.blur(false);
+      if (active && active !== context) {
+        active.blur(false);
       }
 
       // 检查焦点是否在浮层里面
       if (!$.contains(node, context.__getActive())) {
         var autofocus = dialog.find('[autofocus]')[0];
 
-        if (!context._autofocus && autofocus) {
-          context._autofocus = true;
+        if (!context.__autofocus && autofocus) {
+          context.__autofocus = true;
         } else {
           autofocus = node;
         }
@@ -830,7 +830,7 @@
       }
 
       // 非激活状态才做处理
-      if (current !== context) {
+      if (active !== context) {
         var index = context.zIndex = Dialog.zIndex++;
 
         // 设置遮罩层级
@@ -844,7 +844,7 @@
         context.__dispatchEvent('focus');
 
         // 保存当前激活实例
-        Dialog.current = context;
+        Dialog.active = context;
       }
 
       return context;
@@ -868,7 +868,7 @@
         context.__focus(activeElement);
       }
 
-      context._autofocus = false;
+      context.__autofocus = false;
       context.__node.removeClass(context.className + '-focus');
       context.__dispatchEvent('blur');
 
