@@ -743,9 +743,7 @@
       }
 
       // 清理激活项
-      if (Dialog.active === context) {
-        Dialog.active = null;
-      }
+      context.__resetActive();
 
       // 隐藏遮罩
       if (context.open && context.modal) {
@@ -803,6 +801,16 @@
       context.__dispatchEvent('reset');
 
       return context;
+    },
+    /**
+     * 重置焦点激活状态
+     * @private
+     */
+    __resetActive: function() {
+      // 清理激活项
+      if (Dialog.active === this) {
+        Dialog.active = null;
+      }
     },
     /**
      * 让浮层获取焦点
@@ -872,6 +880,9 @@
 
       var isBlur = arguments[0];
       var activeElement = context.__activeElement;
+
+      // 清理激活项
+      context.__resetActive();
 
       if (isBlur !== false) {
         context.__focus(activeElement);
