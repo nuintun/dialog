@@ -375,6 +375,15 @@ Dialog.prototype = {
       return context;
     }
 
+    // 移除跟随定位类名
+    if (context.__align) {
+      // 移除对齐类名
+      context.__node.removeClass(context.__align);
+
+      // 清空对齐类名
+      context.__align = null;
+    }
+
     // 跟随元素
     var anchor = context.anchor;
 
@@ -611,11 +620,6 @@ Dialog.prototype = {
   __follow: function(anchor) {
     var context = this;
     var dialog = context.__node;
-
-    // 移除跟随定位类名
-    if (context.__align) {
-      dialog.removeClass(context.__align);
-    }
 
     // 不能是根节点
     anchor = anchor.parentNode && $(anchor);
