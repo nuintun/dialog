@@ -20,11 +20,17 @@ export default function Dialog() {
   context.destroyed = false;
   context.node = document.createElement('div');
   context.__node = $(context.node)
+    // 设置 tabindex
     .attr('tabindex', '-1')
+    // 设置样式
     .css({
       display: 'none',
       position: 'absolute',
       outline: 0
+    })
+    // 绑定得到焦点事件
+    .on('focusin', function() {
+      context.focus();
     });
 }
 
@@ -338,15 +344,17 @@ Dialog.prototype = {
     }
 
     // 清理激活项
-    context.__resetActive();
+    context.__cleanActive();
 
     // 隐藏遮罩
     if (context.open && context.modal) {
       Backdrop.hide(context);
     }
 
-    // 从 DOM 中移除节点
-    context.__node.remove();
+    // 移除事件绑定并从 DOM 中移除节点
+    context.__node
+      .off('focusin')
+      .remove();
 
     // 切换销毁状态
     context.destroyed = true;
@@ -373,10 +381,13 @@ Dialog.prototype = {
       return context;
     }
 
+    // 对齐类名
+    var align = context.__align;
+
     // 移除跟随定位类名
-    if (context.__align) {
+    if (align) {
       // 移除对齐类名
-      context.__node.removeClass(context.__align);
+      context.__node.removeClass(align);
 
       // 清空对齐类名
       context.__align = null;
@@ -401,7 +412,7 @@ Dialog.prototype = {
    * 重置焦点激活状态
    * @private
    */
-  __resetActive: function() {
+  __cleanActive: function() {
     // 清理激活项
     if (Dialog.active === this) {
       Dialog.active = null;
@@ -428,7 +439,7 @@ Dialog.prototype = {
     }
 
     // 检查焦点是否在浮层里面
-    if (!$.contains(node, context.__getActive())) {
+    if (!node.contains(context.__getActive())) {
       var autofocus = dialog.find('[autofocus]')[0];
 
       if (!context.__autofocus && autofocus) {
@@ -477,7 +488,7 @@ Dialog.prototype = {
     var activeElement = context.__activeElement;
 
     // 清理激活项
-    context.__resetActive();
+    context.__cleanActive();
 
     if (isBlur !== false) {
       context.__focus(activeElement);
