@@ -450,6 +450,9 @@ Dialog.prototype = {
 
       // 获取焦点
       context.__focus(autofocus);
+
+      // 重新获取激活实例
+      active = Dialog.active;
     }
 
     // 非激活状态才做处理
