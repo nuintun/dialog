@@ -431,7 +431,9 @@
       .css({
         display: 'none',
         position: 'absolute',
-        outline: 0
+        outline: 0,
+        top: 0,
+        left: 0
       })
       // 绑定得到焦点事件
       .on('focusin', function() {
